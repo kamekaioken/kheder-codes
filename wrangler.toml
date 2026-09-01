@@ -1,3 +1,9 @@
 name = "kheder-codes"
-pages_build_output_dir = "./dist"
 compatibility_date = "2026-09-01"
+
+# No `main`: the site is fully prerendered, so no Worker script runs and asset
+# requests stay free. Workers does not infer routing the way Pages did, so the
+# trailing-slash behaviour Astro builds for is stated explicitly.
+[assets]
+directory = "./dist"
+html_handling = "auto-trailing-slash"

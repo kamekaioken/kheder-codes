@@ -6,7 +6,7 @@ import { routes } from './helpers';
 // serves these. Assert that the rules ship with the build output instead.
 const headers = () => readFileSync('dist/_headers', 'utf8');
 
-test.describe('cloudflare pages configuration', () => {
+test.describe('cloudflare workers configuration', () => {
 	test('security headers are published for every route', () => {
 		expect(headers()).toContain('X-Content-Type-Options: nosniff');
 		expect(headers()).toContain('X-Frame-Options: DENY');
@@ -22,11 +22,18 @@ test.describe('cloudflare pages configuration', () => {
 		);
 	});
 
-	test('wrangler points pages at the astro build output', () => {
+	test('wrangler serves the astro build output as static assets', () => {
 		const config = readFileSync('wrangler.toml', 'utf8');
 
-		expect(config).toContain('pages_build_output_dir = "./dist"');
 		expect(config).toContain('name = "kheder-codes"');
+		expect(config).toMatch(/\[assets\][\s\S]*directory = "\.\/dist"/);
+		expect(config).toContain('html_handling = "auto-trailing-slash"');
+	});
+
+	// A `main` entry point would turn every hit into a billable Worker
+	// invocation; static asset requests are free and unlimited without one.
+	test('no worker script is configured', () => {
+		expect(readFileSync('wrangler.toml', 'utf8')).not.toMatch(/^main\s*=/m);
 	});
 });
 
