@@ -1,10 +1,13 @@
 <script lang="ts">
 import type { Snippet } from 'svelte';
-import type { HTMLAnchorAttributes } from 'svelte/elements';
+import type { HTMLAttributes } from 'svelte/elements';
 import TerminalMarker from './TerminalMarker.svelte';
 
-type Props = HTMLAnchorAttributes & {
+type Props = HTMLAttributes<HTMLElement> & {
 	children: Snippet;
+	href?: string;
+	target?: string;
+	rel?: string;
 	selected?: boolean;
 	highlight?: boolean;
 	revealed?: boolean;

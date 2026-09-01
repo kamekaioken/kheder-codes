@@ -27,7 +27,7 @@ const session = getSession();
 				aria-current={item.id === session.activeItemId ? 'page' : undefined}
 				data-testid={`menu-${item.id}`}
 				selected={!session.submenu && index === session.selected}
-				revealed={index < session.rows.count}
+				revealed={index < session.boot.rows.count}
 				onselect={item.external ? undefined : () => session.open(index)}
 			>
 				<TerminalRowLabel class="text-fg">{item.name}</TerminalRowLabel>

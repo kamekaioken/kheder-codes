@@ -11,20 +11,20 @@ const session = getSession();
 	data-hero
 	data-testid="hero"
 	class="flex min-h-screen cursor-pointer flex-col items-center justify-center p-6 select-none"
-	onclick={() => session.startTerminal()}
+	onclick={() => session.boot.openTerminal()}
 >
 	<HeroWordmark />
 
 	<div
 		class="mt-14 animate-fade-up-slow"
 		data-hero-hint
-		data-typed={session.heroDone}
+		data-typed={session.boot.heroDone}
 	>
 		<button
 			type="button"
 			class="flex cursor-pointer items-center gap-2.5 text-sm text-dim"
 			data-testid="hero-enter"
-			onclick={() => session.startTerminal()}
+			onclick={() => session.boot.openTerminal()}
 		>
 			<span
 				class="rounded-md border border-line px-[9px] py-[3px] text-xs shadow-key"

@@ -14,7 +14,7 @@ setSession(session);
 onMount(() => session.attach());
 
 $effect(() => {
-	document.documentElement.dataset.phase = session.phase;
+	session.boot.syncPhase();
 });
 </script>
 

@@ -21,7 +21,7 @@ onMount(() => entrance.settle());
 	<TerminalPrompt
 		user="kheder"
 		host="mbp"
-		command={`${session.commandText} ${session.labels.blogCmd}`}
+		command={`${session.boot.commandText} ${session.labels.blogCmd}`}
 	/>
 
 	<TerminalOutput class="mt-1.5 mb-0.5">{session.labels.blogCount}</TerminalOutput>

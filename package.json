@@ -14,7 +14,7 @@
 		"lint:fix": "oxlint --fix .",
 		"format": "biome format --write .",
 		"format:check": "biome format .",
-		"check": "astro check && oxlint . && biome format .",
+		"check": "astro check && svelte-check --tsconfig ./tsconfig.json && oxlint . && biome format .",
 		"test": "playwright test",
 		"test:ui": "playwright test --ui"
 	},
@@ -36,6 +36,7 @@
 		"esbuild": true
 	},
 	"devDependencies": {
-		"@astrojs/check": "^0.9.10"
+		"@astrojs/check": "^0.9.10",
+		"svelte-check": "^4.7.6"
 	}
 }

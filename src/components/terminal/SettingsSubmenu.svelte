@@ -21,7 +21,7 @@ onMount(() => entrance.settle());
 	<TerminalPrompt
 		user="kheder"
 		host="mbp"
-		command={`${session.commandText} ${session.labels.settingsCmd}`}
+		command={`${session.boot.commandText} ${session.labels.settingsCmd}`}
 	/>
 
 	<TerminalOutput class="mt-1.5 mb-0.5"

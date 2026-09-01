@@ -1,8 +1,10 @@
 <script lang="ts">
-import type { HTMLAnchorAttributes } from 'svelte/elements';
+import type { HTMLAttributes } from 'svelte/elements';
 
-type Props = HTMLAnchorAttributes & {
+type Props = HTMLAttributes<HTMLElement> & {
 	label: string;
+	href?: string;
+	hreflang?: string;
 	checked?: boolean;
 	focused?: boolean;
 	onselect?: () => void;

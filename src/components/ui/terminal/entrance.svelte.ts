@@ -16,7 +16,11 @@ export class Entrance {
 	/** Drops the class once the animation is over. Call this on mount. */
 	settle(): () => void {
 		this.#schedule();
-		return () => clearTimeout(this.#timer);
+		return () => this.cancel();
+	}
+
+	cancel(): void {
+		clearTimeout(this.#timer);
 	}
 
 	replay(): void {

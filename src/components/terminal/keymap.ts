@@ -1,8 +1,6 @@
 import { cycle, digitIndex } from '../ui/terminal/navigation';
 import type { TerminalSession } from './session.svelte';
 
-const SETTINGS_ROWS = 2;
-
 function isTypingTarget(target: HTMLElement | null): boolean {
 	return Boolean(
 		target?.closest('input, textarea, select, [contenteditable="true"]'),
@@ -62,27 +60,25 @@ function handleSettings(
 	event: KeyboardEvent,
 	onControl: boolean,
 ): void {
+	const settings = session.settings;
+
 	if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
 		event.preventDefault();
-		session.settingsRow = cycle(
-			session.settingsRow,
-			step(event.key),
-			SETTINGS_ROWS,
-		);
+		settings.moveRow(step(event.key));
 		return;
 	}
 	if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
 		event.preventDefault();
-		session.moveValueCursor(step(event.key));
+		settings.moveCursor(step(event.key));
 		return;
 	}
 	if (event.key === 'Enter' && !onControl) {
 		event.preventDefault();
-		session.applySettingsRow();
+		settings.apply();
 		return;
 	}
-	const index = digitIndex(event.key, SETTINGS_ROWS);
-	if (index !== null) session.settingsRow = index;
+	const index = digitIndex(event.key, settings.rows.length);
+	if (index !== null) settings.focusRow(index);
 }
 
 /** Maps a keystroke onto the session. Rows count from 1, ⎋ always goes back. */
@@ -98,11 +94,11 @@ export function handleTerminalKey(
 	/* Enter and Space belong to the focused link or button, not to the menu. */
 	const onControl = Boolean(target?.closest('a, button'));
 
-	if (session.phase === 'hero') {
+	if (session.boot.phase === 'hero') {
 		if (event.key === 'Enter' || event.key === ' ') {
 			if (onControl) return;
 			event.preventDefault();
-			session.startTerminal();
+			session.boot.openTerminal();
 		}
 		return;
 	}
@@ -113,7 +109,7 @@ export function handleTerminalKey(
 		return;
 	}
 
-	if (!session.menuOn) return;
+	if (!session.boot.menuOn) return;
 
 	if (session.submenu === 'blog') handleBlog(session, event, onControl);
 	else if (session.submenu === 'settings')

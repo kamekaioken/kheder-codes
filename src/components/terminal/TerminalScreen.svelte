@@ -18,7 +18,7 @@ const session = getSession();
 	data-testid="terminal"
 	class={[
 		'mx-auto box-border w-full max-w-[840px] px-4 pt-[clamp(20px,5vh,56px)]',
-		session.entrance.active && 'animate-fade-up',
+		session.boot.entrance.active && 'animate-fade-up',
 	]}
 >
 	<TerminalWindow>
@@ -36,12 +36,12 @@ const session = getSession();
 			<TerminalPrompt
 				user="kheder"
 				host="mbp"
-				command={session.commandText}
-				typed={session.command.count}
-				cursor={session.phase === 'term' && !session.menuOn}
+				command={session.boot.commandText}
+				typed={session.boot.command.count}
+				cursor={session.boot.phase === 'term' && !session.boot.menuOn}
 			/>
 
-			<div data-menu data-typed={session.menuOn}>
+			<div data-menu data-typed={session.boot.menuOn}>
 				<MainMenu />
 
 				{#if session.submenu === 'blog'}

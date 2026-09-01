@@ -50,10 +50,14 @@ Two layers, one component per file.
   typed text, cursor, rows, choices, hint line, plus a `Typewriter` and an `Entrance`
   state helper. These take props only and know nothing about kheder.codes — treat them
   as a library you happen to keep in this repo, and do not import app modules into them.
-- `src/components/terminal/` composes that kit into this site's terminal. State lives in
-  one `TerminalSession` (`session.svelte.ts`) put into Svelte context by
-  `KhederTerminal.svelte`; subcomponents call `getSession()` instead of taking props.
-  Only `KhederTerminal.svelte` takes props, typed as `TerminalProps` in `src/lib/terminal.ts`.
+- `src/components/terminal/` composes that kit into this site's terminal. State lives in a
+  `TerminalSession` (`session.svelte.ts`) put into Svelte context by `KhederTerminal.svelte`;
+  subcomponents call `getSession()` instead of taking props. Only `KhederTerminal.svelte`
+  takes props, typed as `TerminalProps` in `src/lib/terminal.ts`.
+- The session holds the page's own facts (menu, route, row cursors, navigation) and composes
+  the rest: `boot.svelte.ts` owns the intro choreography (`session.boot`),
+  `settings.svelte.ts` the settings submenu (`session.settings`), and `keymap.ts` maps
+  keystrokes onto both. Put new state in the piece it belongs to, not in the session.
 
 ## Animations
 `<html transition:animate="none">` in `src/layouts/Base.astro` switches off the page-wide
@@ -62,6 +66,11 @@ in `Section.astro`). Astro restarts CSS animations on persisted islands during a
 entry animations inside the terminal are gated on an `Entrance` flag that drops the class
 once it has played. Never put a bare `animate-*` class on anything that lives inside
 `transition:persist`.
+
+## Checks
+`pnpm check` runs `astro check` (`.astro`/`.ts`), `svelte-check` (the island — `astro check`
+does not type-check `.svelte` files), oxlint and a Biome format check. Biome's linter is off
+by design; oxlint is the linter.
 
 ## Testing
 `pnpm test` builds the site and runs Playwright against `astro preview`. Because

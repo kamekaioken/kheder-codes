@@ -7,7 +7,7 @@ import { getSession } from './session.svelte';
 
 const session = getSession();
 
-const focused = $derived(session.settingsRow === 0);
+const focused = $derived(session.settings.row === 'language');
 </script>
 
 <TerminalRow
@@ -22,7 +22,7 @@ const focused = $derived(session.settingsRow === 0);
 		>{session.labels.rowLanguage}</TerminalRowLabel
 	>
 	<TerminalChoiceGroup>
-		{#each session.languages as option, index (option.locale)}
+		{#each session.settings.languages as option, index (option.locale)}
 			<TerminalChoice
 				href={option.href}
 				hreflang={option.locale}
@@ -30,10 +30,10 @@ const focused = $derived(session.settingsRow === 0);
 				data-testid={`lang-${option.locale}`}
 				label={option.name}
 				checked={option.active}
-				focused={focused && session.langCursor === index}
+				focused={focused && session.settings.langCursor === index}
 				onselect={() => {
-					session.settingsRow = 0;
-					session.langCursor = index;
+					session.settings.focusRow(0);
+					session.settings.langCursor = index;
 				}}
 			/>
 		{/each}

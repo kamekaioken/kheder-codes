@@ -4,9 +4,6 @@ Terminal-style portfolio for Kheder — freelance software developer, Nuremberg.
 Built with Astro, one Svelte island for the terminal, Tailwind 4 for the design tokens,
 and Paraglide JS for German/English.
 
-The design source of truth is `design_handoff_kheder_codes/` (HTML prototype, screenshots,
-token table). It is a reference bundle, not code, and is excluded from linting/formatting.
-
 ## Commands
 
 | Command          | Action                                                        |
@@ -16,7 +13,7 @@ token table). It is a reference bundle, not code, and is excluded from linting/f
 | `pnpm build`     | Build to `./dist/`                                            |
 | `pnpm preview`   | Serve the build                                               |
 | `pnpm test`      | Build, then run the Playwright suite                          |
-| `pnpm check`     | `astro check` + oxlint + Biome format check                   |
+| `pnpm check`     | `astro check` + `svelte-check` + oxlint + Biome format check   |
 
 ## Routes
 
@@ -46,9 +43,12 @@ page is crawlable without JS.
 window chrome, prompt, typed text, blinking cursor, rows, ASCII radio choices, hint line —
 built to be lifted into any project: props only, no imports from `src/lib`. One component
 per file. `src/components/terminal/` composes that kit into this site's terminal, and its
-state lives in a single `TerminalSession` (`session.svelte.ts`) that
-`KhederTerminal.svelte` puts into Svelte context, so the hero, the window and the submenus
-call `getSession()` instead of being handed a dozen props each.
+state lives in a `TerminalSession` (`session.svelte.ts`) that `KhederTerminal.svelte` puts
+into Svelte context, so the hero, the window and the submenus call `getSession()` instead of
+being handed a dozen props each. The session keeps the page's own facts — menu, route, row
+cursors, navigation — and composes the rest: `session.boot` (`boot.svelte.ts`) runs the
+intro, `session.settings` (`settings.svelte.ts`) is the settings submenu, and `keymap.ts`
+maps keystrokes onto both.
 
 **One animation per navigation.** `<html transition:animate="none">` switches off Astro's
 page-wide crossfade, so a navigation animates only what is actually new: the `<section>`
@@ -87,8 +87,3 @@ Key modules:
 - `src/lib/terminal.ts` — builds the menu, labels and settings options for a locale, and owns the island's prop types
 - `src/lib/theme.ts` / `src/lib/intro.ts` — storage keys and helpers shared by the island and the inline pre-paint script
 - `src/content.config.ts` — blog collection; entries live in `src/content/blog/<locale>/` and pair up through `translationKey`
-
-## Open items from the handoff
-
-The two remaining asset follow-ups (Open Graph image, SVG logo) are tracked in
-[issue #1](https://github.com/kamekaioken/kheder-codes/issues/1).

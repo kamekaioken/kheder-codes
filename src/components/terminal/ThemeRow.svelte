@@ -7,7 +7,7 @@ import { getSession } from './session.svelte';
 
 const session = getSession();
 
-const focused = $derived(session.settingsRow === 1);
+const focused = $derived(session.settings.row === 'theme');
 </script>
 
 <TerminalRow
@@ -22,17 +22,17 @@ const focused = $derived(session.settingsRow === 1);
 		>{session.labels.rowTheme}</TerminalRowLabel
 	>
 	<TerminalChoiceGroup>
-		{#each session.themeOptions as option, index (option.value)}
+		{#each session.settings.themeOptions as option, index (option.value)}
 			<TerminalChoice
-				aria-pressed={session.theme === option.value}
+				aria-pressed={session.settings.theme === option.value}
 				data-testid={`theme-${option.value}`}
 				label={option.name}
-				checked={session.theme === option.value}
-				focused={focused && session.themeCursor === index}
+				checked={session.settings.theme === option.value}
+				focused={focused && session.settings.themeCursor === index}
 				onselect={() => {
-					session.settingsRow = 1;
-					session.themeCursor = index;
-					session.setTheme(option.value);
+					session.settings.focusRow(1);
+					session.settings.themeCursor = index;
+					session.settings.setTheme(option.value);
 				}}
 			/>
 		{/each}
