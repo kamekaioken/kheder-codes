@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import { alternatesFor, type Locale } from '../../lib/i18n';
+import { site, skillGroups } from '../../lib/site';
+import { m } from '../../paraglide/messages.js';
+import Chip from '../Chip.astro';
+import Section from '../Section.astro';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const o = { locale };
+
+const groupLabels = {
+	languages: m.about_group_languages({}, o),
+	runtime: m.about_group_runtime({}, o),
+	ai: m.about_group_ai({}, o),
+};
+---
+
+<Base
+	{locale}
+	current="about"
+	title={m.about_title({}, o)}
+	description={m.about_description({}, o)}
+	alternates={alternatesFor('about')}
+>
+	<Section
+		kicker={m.about_kicker({}, o)}
+		heading={m.about_h2({}, o)}
+		srTitle={m.about_title({}, o)}
+	>
+		<p class="m-0 mb-3.5 text-[15px] leading-[1.8] text-fg">
+			{m.about_p1_before({}, o)}<strong>{m.about_p1_strong({}, o)}</strong>{
+				m.about_p1_after({}, o)
+			}
+		</p>
+		<p class="m-0 mb-9 text-[15px] leading-[1.8] text-dim">
+			{m.about_p2_before({}, o)}<a href={site.donnadesk} target="_blank" rel="noopener"
+				>{m.about_p2_link({}, o)}</a
+			>{m.about_p2_after({}, o)}
+		</p>
+
+		<div class="flex flex-col gap-[22px]">
+			{
+				skillGroups.map((group) => (
+					<Chip label={groupLabels[group.id]} items={group.items} />
+				))
+			}
+		</div>
+	</Section>
+</Base>

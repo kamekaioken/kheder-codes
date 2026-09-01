@@ -1,0 +1,59 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { baseLocale, htmlLang, type Locale, locales } from '../lib/i18n';
+import ThemeInit from './ThemeInit.astro';
+
+interface Props {
+	locale: Locale;
+	title: string;
+	description: string;
+	alternates: Partial<Record<Locale, string>>;
+}
+
+const { locale, title, description, alternates } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const alternateUrls = locales
+	.filter((candidate) => alternates[candidate] !== undefined)
+	.map((candidate) => ({
+		locale: candidate,
+		href: new URL(alternates[candidate] as string, Astro.site).href,
+	}));
+const defaultHref = alternateUrls.find(
+	(entry) => entry.locale === baseLocale,
+)?.href;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical.href} />
+
+{
+	alternateUrls.map((entry) => (
+		<link rel="alternate" hreflang={htmlLang[entry.locale]} href={entry.href} />
+	))
+}
+{defaultHref && <link rel="alternate" hreflang="x-default" href={defaultHref} />}
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="kheder.codes" />
+<meta property="og:locale" content={htmlLang[locale].replace('-', '_')} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical.href} />
+<meta name="twitter:card" content="summary" />
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+	rel="stylesheet"
+	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap"
+/>
+
+<ThemeInit />
+<ClientRouter />

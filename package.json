@@ -1,31 +1,41 @@
 {
-  "name": "kheder-codes",
-  "type": "module",
-  "version": "0.0.1",
-  "engines": {
-    "node": ">=22.12.0"
-  },
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "lint": "oxlint .",
+	"name": "kheder-codes",
+	"type": "module",
+	"version": "0.0.1",
+	"engines": {
+		"node": ">=22.12.0"
+	},
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"astro": "astro",
+		"lint": "oxlint .",
 		"lint:fix": "oxlint --fix .",
 		"format": "biome format --write .",
 		"format:check": "biome format .",
-		"check": "oxlint . && biome format ."
-  },
-  "dependencies": {
-    "@astrojs/svelte": "^9.0.1",
+		"check": "astro check && oxlint . && biome format .",
+		"test": "playwright test",
+		"test:ui": "playwright test --ui"
+	},
+	"dependencies": {
+		"@astrojs/sitemap": "^3.7.4",
+		"@astrojs/svelte": "^9.0.1",
 		"@biomejs/biome": "2.5.11",
-    "astro": "^7.2.10",
-    "svelte": "^5.57.0",
-    "typescript": "^6.0.3",
+		"@inlang/paraglide-js": "^2.25.0",
+		"@playwright/test": "^1.60.0",
+		"@tailwindcss/vite": "^4.3.3",
+		"astro": "^7.2.10",
 		"oxlint": "^1.80.0",
-		"@playwright/test": "^1.60.0"
-  },
-  "allowScripts": {
-    "esbuild": true
-  }
+		"sharp": "^0.35.4",
+		"svelte": "^5.57.0",
+		"tailwindcss": "^4.3.3",
+		"typescript": "^6.0.3"
+	},
+	"allowScripts": {
+		"esbuild": true
+	},
+	"devDependencies": {
+		"@astrojs/check": "^0.9.10"
+	}
 }

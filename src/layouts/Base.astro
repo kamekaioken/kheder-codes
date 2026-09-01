@@ -1,0 +1,75 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Terminal from '../components/Terminal.svelte';
+import { getPosts } from '../lib/blog';
+import { htmlLang, type Locale, pathFor } from '../lib/i18n';
+import {
+	buildLabels,
+	buildLanguages,
+	buildMenu,
+	buildThemeOptions,
+	toTerminalPosts,
+} from '../lib/terminal';
+import { m } from '../paraglide/messages.js';
+import '../styles/global.css';
+
+interface Props {
+	locale: Locale;
+	title: string;
+	description: string;
+	current: 'home' | 'about' | 'blog' | 'refs' | 'contact' | 'settings' | 'post';
+	alternates: Partial<Record<Locale, string>>;
+	currentPostFile?: string | null;
+}
+
+const {
+	locale,
+	title,
+	description,
+	current,
+	alternates,
+	currentPostFile = null,
+} = Astro.props;
+
+const showIntro = current === 'home';
+const items = buildMenu(locale);
+const posts = await getPosts(locale);
+const labels = buildLabels(locale, items);
+---
+
+<html lang={htmlLang[locale]} data-phase={showIntro ? 'hero' : 'term'}>
+	<head>
+		<BaseHead {locale} {title} {description} {alternates} />
+	</head>
+	<body class="font-mono bg-page text-fg">
+		<a
+			href="#content"
+			class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-10 focus:rounded-md focus:border focus:border-line focus:bg-term focus:px-3 focus:py-2 focus:text-sm"
+			>{m.skip_to_content({}, { locale })}</a
+		>
+
+		<div class="flex min-h-screen flex-col">
+			<Terminal
+				client:load
+				transition:persist="terminal"
+				{items}
+				posts={toTerminalPosts(posts)}
+				languages={buildLanguages(locale, alternates)}
+				themeOptions={buildThemeOptions(locale)}
+				{current}
+				{currentPostFile}
+				{showIntro}
+				{labels}
+				homeHref={pathFor('home', locale)}
+				blogHref={pathFor('blog', locale)}
+			/>
+
+			<main id="content" data-hide-on-hero>
+				<slot />
+			</main>
+
+			<Footer {locale} />
+		</div>
+	</body>
+</html>

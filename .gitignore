@@ -22,3 +22,13 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# paraglide compiler output
+src/paraglide/
+
+# playwright
+test-results/
+playwright-report/
+
+# playwright mcp scratch
+.playwright-mcp/

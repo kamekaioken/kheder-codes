@@ -1,0 +1,69 @@
+---
+import Base from '../../layouts/Base.astro';
+import { alternatesFor, type Locale } from '../../lib/i18n';
+import { references } from '../../lib/site';
+import { m } from '../../paraglide/messages.js';
+import Section from '../Section.astro';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const o = { locale };
+
+const descriptions = {
+	hannover: m.refs_hannover({}, o),
+	donna: m.refs_donna({}, o),
+	wts: m.refs_wts({}, o),
+	giz: m.refs_giz({}, o),
+};
+---
+
+<Base
+	{locale}
+	current="refs"
+	title={m.refs_title({}, o)}
+	description={m.refs_description({}, o)}
+	alternates={alternatesFor('refs')}
+>
+	<Section
+		kicker={m.refs_kicker({}, o)}
+		heading={m.refs_h2({}, o)}
+		srTitle={m.refs_title({}, o)}
+		headingSpace="mb-2"
+	>
+		<ul class="m-0 flex list-none flex-col p-0">
+			{
+				references.map((reference, index) => (
+					<li
+						class:list={[
+							'flex flex-wrap items-baseline gap-x-6 gap-y-1.5 py-[22px]',
+							index < references.length - 1 && 'border-b border-dashed border-line',
+						]}
+					>
+						<span class="min-w-[140px] text-base font-bold">
+							{reference.name}
+							{reference.href && (
+								<Fragment>
+									{' '}
+									<a
+										href={reference.href}
+										target="_blank"
+										rel="noopener"
+										class="text-[13px]"
+									>
+										↗
+									</a>
+								</Fragment>
+							)}
+						</span>
+						<span class="min-w-[240px] flex-1 text-sm leading-[1.7] text-dim">
+							{descriptions[reference.id]}
+						</span>
+					</li>
+				))
+			}
+		</ul>
+	</Section>
+</Base>

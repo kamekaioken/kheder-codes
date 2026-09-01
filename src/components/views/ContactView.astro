@@ -1,0 +1,69 @@
+---
+import Base from '../../layouts/Base.astro';
+import { alternatesFor, type Locale } from '../../lib/i18n';
+import { site } from '../../lib/site';
+import { m } from '../../paraglide/messages.js';
+import Section from '../Section.astro';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const o = { locale };
+
+const rows = [
+	{
+		label: m.contact_label_mail({}, o),
+		href: `mailto:${site.mail}`,
+		text: site.mail,
+		external: false,
+	},
+	{
+		label: m.contact_label_github({}, o),
+		href: site.github,
+		text: site.githubLabel,
+		external: true,
+	},
+	{
+		label: m.contact_label_linkedin({}, o),
+		href: site.linkedin,
+		text: site.linkedinLabel,
+		external: true,
+	},
+];
+---
+
+<Base
+	{locale}
+	current="contact"
+	title={m.contact_title({}, o)}
+	description={m.contact_description({}, o)}
+	alternates={alternatesFor('contact')}
+>
+	<Section
+		kicker={m.contact_kicker({}, o)}
+		heading={m.contact_h2({}, o)}
+		srTitle={m.contact_title({}, o)}
+	>
+		<p class="m-0 mb-7 text-[15px] leading-[1.8] text-dim">{m.contact_intro({}, o)}</p>
+		<dl class="m-0 flex flex-col gap-3 text-sm">
+			{
+				rows.map((row) => (
+					<div class="flex items-baseline gap-3.5">
+						<dt class="min-w-[80px] text-dim">{row.label}</dt>
+						<dd class="m-0">
+							<a
+								href={row.href}
+								target={row.external ? '_blank' : undefined}
+								rel={row.external ? 'noopener' : undefined}
+							>
+								{row.text}
+							</a>
+						</dd>
+					</div>
+				))
+			}
+		</dl>
+	</Section>
+</Base>

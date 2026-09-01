@@ -1,0 +1,19 @@
+---
+interface Props {
+	label: string;
+	items: readonly string[];
+}
+
+const { label, items } = Astro.props;
+---
+
+<div>
+	<div class="mb-2.5 text-xs tracking-[.08em] text-dim uppercase"># {label}</div>
+	<div class="flex flex-wrap gap-2">
+		{
+			items.map((item) => (
+				<span class="rounded-md border border-line px-2.5 py-1 text-[13px]">{item}</span>
+			))
+		}
+	</div>
+</div>

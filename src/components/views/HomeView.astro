@@ -1,0 +1,20 @@
+---
+import Base from '../../layouts/Base.astro';
+import { alternatesFor, type Locale } from '../../lib/i18n';
+import { m } from '../../paraglide/messages.js';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const o = { locale };
+---
+
+<Base
+	{locale}
+	current="home"
+	title={m.site_title({}, o)}
+	description={m.site_description({}, o)}
+	alternates={alternatesFor('home')}
+/>

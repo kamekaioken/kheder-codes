@@ -1,0 +1,48 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPosts } from '../../lib/blog';
+import { alternatesFor, type Locale } from '../../lib/i18n';
+import { m } from '../../paraglide/messages.js';
+import Section from '../Section.astro';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const o = { locale };
+const posts = await getPosts(locale);
+---
+
+<Base
+	{locale}
+	current="blog"
+	title={m.blog_title({}, o)}
+	description={m.blog_description({}, o)}
+	alternates={alternatesFor('blog')}
+>
+	<Section
+		kicker={m.blog_kicker({}, o)}
+		heading={m.blog_h2({}, o)}
+		srTitle={m.blog_title({}, o)}
+		headingSpace="mb-6"
+	>
+		<ul class="m-0 flex list-none flex-col gap-2.5 p-0">
+			{
+				posts.map((post) => (
+					<li class="flex items-baseline gap-3.5 rounded-lg border border-dashed border-line px-4 py-3.5 text-dim">
+						<a href={post.href} class="text-[13px] text-dim">
+							{post.file}
+						</a>
+						{post.wip && (
+							<span class="ml-auto flex-none rounded-[4px] border border-line px-[7px] py-[2px] text-[11px]">
+								{m.badge_wip({}, o)}
+							</span>
+						)}
+					</li>
+				))
+			}
+		</ul>
+		<p class="mt-[18px] text-[13px] text-dim">{m.blog_note({}, o)}</p>
+	</Section>
+</Base>

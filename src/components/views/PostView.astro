@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import type { BlogEntry } from '../../lib/blog';
+import { getPostTranslations } from '../../lib/blog';
+import type { Locale } from '../../lib/i18n';
+import { m } from '../../paraglide/messages.js';
+import Section from '../Section.astro';
+
+interface Props {
+	locale: Locale;
+	post: BlogEntry;
+}
+
+const { locale, post } = Astro.props;
+const o = { locale };
+const alternates = await getPostTranslations(post.translationKey);
+---
+
+<Base
+	{locale}
+	current="post"
+	currentPostFile={post.file}
+	title={`${post.title} — kheder.codes`}
+	description={m.post_body({}, o)}
+	{alternates}
+>
+	<Section
+		kicker={m.post_kicker({ file: post.file }, o)}
+		heading={post.title}
+		srTitle={`${post.title} — kheder.codes`}
+	>
+		<p class="m-0 text-[15px] leading-[1.8] text-dim">{m.post_body({}, o)}</p>
+		<p class="mt-[18px] text-[13px] text-dim">{m.post_back({}, o)}</p>
+	</Section>
+</Base>

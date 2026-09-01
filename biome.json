@@ -6,7 +6,13 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["**", "!!**/dist", "!!**/__tests__"]
+		"includes": [
+			"**",
+			"!!**/dist",
+			"!!**/__tests__",
+			"!!design_handoff_kheder_codes",
+			"!!src/paraglide"
+		]
 	},
 	"css": {
 		"parser": {

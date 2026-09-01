@@ -1,0 +1,21 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo.png';
+import type { Locale } from '../lib/i18n';
+import { m } from '../paraglide/messages.js';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<footer
+	data-hide-on-hero
+	class="mx-auto mt-auto box-border flex w-full max-w-[760px] items-center gap-4 px-5 pt-12 pb-8 text-xs text-dim"
+>
+	<Image src={logo} alt="KHEDER.codes" height={34} densities={[1, 2]} class="logo-themed h-[34px] w-auto" />
+	<span>{m.footer_copyright({}, { locale })}</span>
+	<span class="ml-auto">{m.footer_exit({}, { locale })}</span>
+</footer>

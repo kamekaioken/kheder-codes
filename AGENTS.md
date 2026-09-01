@@ -32,4 +32,18 @@ Use the Astro and Svelte MCP Server and Skills or at least visit these docs befo
 Do not add inline comments to the code if the code is self-explanatory.
 
 ## i18n
-Use [Paraglide JS](https://paraglidejs.com/sveltekit)as SvelteKit's official i18n integration
+[Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) provides the messages,
+wired up as a Vite plugin (see `astro.config.mjs`) rather than the SvelteKit integration.
+
+- Copy lives in `messages/de.json` and `messages/en.json`; `de` is the base locale.
+- `src/paraglide/` is compiler output — generated on build, gitignored, never edited.
+- Call messages with an explicit locale: `m.menu_about({}, { locale })`. Middleware also
+  sets the ambient locale, but passing it keeps components renderable for either language.
+- URLs are owned by `src/lib/i18n.ts`, not by Paraglide's `urlPatterns`: German is served
+  unprefixed (`/ueber-mich`) and English under a translated slug (`/en/about`). Add a route
+  there and its menu entry, `hreflang` links and sitemap alternates follow.
+
+## Testing
+`pnpm test` builds the site and runs Playwright against `astro preview`. Because
+`astro preview` daemonises itself, the server is started from `tests/global-setup.ts`
+instead of Playwright's `webServer` helper.

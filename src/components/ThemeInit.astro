@@ -1,0 +1,33 @@
+---
+import { introStorageKey, themeStorageKey } from '../lib/theme';
+---
+
+<script is:inline define:vars={{ themeStorageKey, introStorageKey }}>
+	function khederSyncRoot() {
+		const root = document.documentElement;
+		root.dataset.js = 'on';
+
+		try {
+			const stored = localStorage.getItem(themeStorageKey);
+			if (stored === 'light' || stored === 'dark') root.setAttribute('data-theme', stored);
+			else root.removeAttribute('data-theme');
+		} catch {
+			/* storage blocked — fall back to the system theme */
+		}
+
+		if (root.dataset.phase === 'hero') {
+			try {
+				if (sessionStorage.getItem(introStorageKey)) root.dataset.phase = 'term';
+			} catch {
+				/* storage blocked — replay the intro */
+			}
+		}
+	}
+
+	khederSyncRoot();
+
+	if (!window.khederRootSyncBound) {
+		window.khederRootSyncBound = true;
+		document.addEventListener('astro:after-swap', khederSyncRoot);
+	}
+</script>
