@@ -123,7 +123,9 @@ test.describe('SEO basics', () => {
 			);
 			await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
 				'href',
-				new RegExp(`^https://kheder\\.codes${path.replace(/\/$/, '')}/?$`),
+				new RegExp(
+					`^https://www\\.kheder\\.codes${path.replace(/\/$/, '')}/?$`,
+				),
 			);
 			await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
 				'content',
@@ -164,13 +166,13 @@ test.describe('SEO basics', () => {
 		const robots = await request.get('/robots.txt');
 		expect(robots.status()).toBe(200);
 		expect(await robots.text()).toContain(
-			'Sitemap: https://kheder.codes/sitemap-index.xml',
+			'Sitemap: https://www.kheder.codes/sitemap-index.xml',
 		);
 
 		const sitemap = await request.get('/sitemap-0.xml');
 		expect(sitemap.status()).toBe(200);
 		const xml = await sitemap.text();
-		expect(xml).toContain('https://kheder.codes/ueber-mich');
-		expect(xml).toContain('https://kheder.codes/en/about');
+		expect(xml).toContain('https://www.kheder.codes/ueber-mich');
+		expect(xml).toContain('https://www.kheder.codes/en/about');
 	});
 });

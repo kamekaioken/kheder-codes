@@ -1,6 +1,6 @@
 export const site = {
 	domain: 'kheder.codes',
-	origin: 'https://kheder.codes',
+	origin: 'https://www.kheder.codes',
 	mail: 'hallo@kheder.codes',
 	donnadesk: 'https://www.donnadesk.de',
 	github: 'https://github.com/kamekaioken',
