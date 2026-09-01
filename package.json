@@ -32,8 +32,11 @@
 		"tailwindcss": "^4.3.3",
 		"typescript": "^6.0.3"
 	},
-	"allowScripts": {
-		"esbuild": true
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild",
+			"sharp"
+		]
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.9.10",
