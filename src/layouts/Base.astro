@@ -1,7 +1,7 @@
 ---
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
-import Terminal from '../components/Terminal.svelte';
+import KhederTerminal from '../components/terminal/KhederTerminal.svelte';
 import { getPosts } from '../lib/blog';
 import { htmlLang, type Locale, pathFor } from '../lib/i18n';
 import {
@@ -38,7 +38,11 @@ const posts = await getPosts(locale);
 const labels = buildLabels(locale, items);
 ---
 
-<html lang={htmlLang[locale]} data-phase={showIntro ? 'hero' : 'term'}>
+<html
+	lang={htmlLang[locale]}
+	data-phase={showIntro ? 'hero' : 'term'}
+	transition:animate="none"
+>
 	<head>
 		<BaseHead {locale} {title} {description} {alternates} />
 	</head>
@@ -50,7 +54,7 @@ const labels = buildLabels(locale, items);
 		>
 
 		<div class="flex min-h-screen flex-col">
-			<Terminal
+			<KhederTerminal
 				client:load
 				transition:persist="terminal"
 				{items}

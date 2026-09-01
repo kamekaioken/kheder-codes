@@ -8,7 +8,7 @@ test.describe('content pages', () => {
 		await page.goto(routes.de.about);
 
 		await expect(page.locator('main')).toContainText('$ whoami');
-		await expect(page.locator('h2')).toHaveText('Servus, ich bin Kheder.');
+		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
 		await expect(page.locator('main p').first()).toContainText(
 			'Freiberuflicher Softwareentwickler aus Nürnberg mit 12 Jahren Erfahrung.',
 		);
@@ -50,7 +50,7 @@ test.describe('content pages', () => {
 		await page.goto(routes.de.blog);
 
 		await expect(page.locator('main')).toContainText('$ ls ./blog');
-		await expect(page.locator('h2')).toHaveText('Blog');
+		await expect(page.locator('h1')).toHaveText('Blog');
 		await expect(page.locator('main li')).toHaveCount(3);
 		await expect(page.locator('main')).toContainText(
 			'voice-agents-mit-livekit.md',
@@ -68,7 +68,7 @@ test.describe('content pages', () => {
 		await expect(page.locator('main')).toContainText(
 			'$ cat ./blog/voice-agents-mit-livekit.md',
 		);
-		await expect(page.locator('h2')).toHaveText('Voice Agents mit LiveKit');
+		await expect(page.locator('h1')).toHaveText('Voice Agents mit LiveKit');
 		await expect(page.locator('main')).toContainText(
 			'Dieser Artikel ist noch in Arbeit — schau bald wieder vorbei.',
 		);
@@ -81,7 +81,7 @@ test.describe('content pages', () => {
 		await page.goto(routes.de.refs);
 
 		await expect(page.locator('main')).toContainText('$ cat referenzen.md');
-		await expect(page.locator('h2')).toHaveText('Referenzen');
+		await expect(page.locator('h1')).toHaveText('Referenzen');
 
 		const entries = page.locator('main li');
 		await expect(entries).toHaveCount(4);
@@ -99,7 +99,7 @@ test.describe('content pages', () => {
 		await page.goto(routes.de.contact);
 
 		await expect(page.locator('main')).toContainText('$ kheder --kontakt');
-		await expect(page.locator('h2')).toHaveText('Sag hallo.');
+		await expect(page.locator('h1')).toHaveText('Sag hallo.');
 
 		await expect(
 			page.locator('main a', { hasText: 'hallo@kheder.codes' }),

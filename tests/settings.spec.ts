@@ -35,8 +35,8 @@ test.describe('settings submenu', () => {
 		await page.goto(routes.de.settings);
 		await waitForMenu(page);
 
-		await expect(page.getByTestId('lang-de')).toHaveText('deutsch');
-		await expect(page.getByTestId('lang-en')).toHaveText('english');
+		await expect(page.getByTestId('lang-de')).toContainText('deutsch');
+		await expect(page.getByTestId('lang-en')).toContainText('english');
 		await expect(page.getByTestId('lang-de')).toHaveAttribute(
 			'aria-current',
 			'true',
@@ -57,9 +57,9 @@ test.describe('settings submenu', () => {
 		await page.goto(routes.de.settings);
 		await waitForMenu(page);
 
-		await expect(page.getByTestId('theme-system')).toHaveText('system');
-		await expect(page.getByTestId('theme-light')).toHaveText('light');
-		await expect(page.getByTestId('theme-dark')).toHaveText('dark');
+		await expect(page.getByTestId('theme-system')).toContainText('system');
+		await expect(page.getByTestId('theme-light')).toContainText('light');
+		await expect(page.getByTestId('theme-dark')).toContainText('dark');
 		await expect(page.getByTestId('theme-system')).toHaveAttribute(
 			'aria-pressed',
 			'true',
@@ -187,11 +187,63 @@ test.describe('settings submenu', () => {
 		await expect(page.getByTestId('settings-submenu')).toBeHidden();
 	});
 
+	test('the cursor is visible and distinct from the saved value', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.settings);
+		await waitForMenu(page);
+
+		const accent = 'rgb(14, 126, 138)';
+		const noBorder = 'rgba(0, 0, 0, 0)';
+
+		await expect(page.getByTestId('settings-language')).toContainText('❯');
+		await expect(page.getByTestId('lang-de')).toContainText('(•) deutsch');
+		await expect(page.getByTestId('lang-en')).toContainText('( ) english');
+		await expect(page.getByTestId('lang-de')).toHaveCSS(
+			'border-top-color',
+			accent,
+		);
+		await expect(page.getByTestId('lang-en')).toHaveCSS(
+			'border-top-color',
+			noBorder,
+		);
+
+		await page.keyboard.press('ArrowDown');
+
+		await expect(page.getByTestId('settings-theme')).toContainText('❯');
+		await expect(page.getByTestId('lang-de')).toHaveCSS(
+			'border-top-color',
+			noBorder,
+		);
+		await expect(page.getByTestId('theme-system')).toHaveCSS(
+			'border-top-color',
+			accent,
+		);
+
+		await page.keyboard.press('ArrowRight');
+
+		await expect(page.getByTestId('theme-light')).toHaveCSS(
+			'border-top-color',
+			accent,
+		);
+		await expect(page.getByTestId('theme-system')).toHaveCSS(
+			'border-top-color',
+			noBorder,
+		);
+		await expect(page.getByTestId('theme-system')).toContainText('(•) system');
+		await expect(page.getByTestId('theme-light')).toContainText('( ) light');
+
+		await page.keyboard.press('Enter');
+
+		await expect(page.getByTestId('theme-light')).toContainText('(•) light');
+		await expect(page.getByTestId('theme-system')).toContainText('( ) system');
+	});
+
 	test('the settings page carries crawlable content', async ({ page }) => {
 		await page.goto(routes.de.settings);
 
 		await expect(page).toHaveTitle('Einstellungen — kheder.codes');
-		await expect(page.locator('h2')).toHaveText('Einstellungen');
+		await expect(page.locator('h1')).toHaveText('Einstellungen');
 		await expect(page.locator('main')).toContainText(
 			'lokal in diesem Browser gespeichert',
 		);

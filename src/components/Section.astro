@@ -2,23 +2,21 @@
 interface Props {
 	kicker: string;
 	heading: string;
-	srTitle: string;
 	headingSpace?: string;
 }
 
-const { kicker, heading, srTitle, headingSpace = 'mb-[18px]' } = Astro.props;
+const { kicker, heading, headingSpace = 'mb-[18px]' } = Astro.props;
 ---
 
 <section class="mx-auto box-border w-full max-w-[760px] px-5 pt-14 pb-10 animate-fade-up">
-	<h1 class="sr-only">{srTitle}</h1>
 	<div class="mb-2.5 text-[13px] text-dim">{kicker}</div>
-	<h2
+	<h1
 		class:list={[
 			'font-display m-0 text-h2 font-extrabold tracking-[-0.02em]',
 			headingSpace,
 		]}
 	>
 		{heading}
-	</h2>
+	</h1>
 	<slot />
 </section>

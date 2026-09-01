@@ -2,7 +2,7 @@ import { m } from '../paraglide/messages.js';
 import type { BlogEntry } from './blog';
 import { type Locale, locales, pathFor } from './i18n';
 import { site } from './site';
-import { themes } from './theme';
+import { type Theme, themes } from './theme';
 
 export type TerminalItem = {
 	id: string;
@@ -11,6 +11,42 @@ export type TerminalItem = {
 	href: string;
 	external: boolean;
 	submenu: 'blog' | 'settings' | null;
+};
+
+export type TerminalPost = { file: string; title: string; href: string };
+
+export type LanguageOption = {
+	locale: Locale;
+	name: string;
+	href: string;
+	active: boolean;
+};
+
+export type ThemeOption = { value: Theme; name: string };
+
+export type TerminalRoute =
+	| 'home'
+	| 'about'
+	| 'blog'
+	| 'refs'
+	| 'contact'
+	| 'settings'
+	| 'post';
+
+export type TerminalLabels = ReturnType<typeof buildLabels>;
+
+export type TerminalProps = {
+	items: TerminalItem[];
+	posts: TerminalPost[];
+	languages: LanguageOption[];
+	themeOptions: ThemeOption[];
+	labels: TerminalLabels;
+	current: TerminalRoute;
+	currentPostFile?: string | null;
+	showIntro?: boolean;
+	homeHref: string;
+	blogHref: string;
+	typingSpeed?: number;
 };
 
 export function buildMenu(locale: Locale): TerminalItem[] {
@@ -106,7 +142,7 @@ export function buildLabels(locale: Locale, items: TerminalItem[]) {
 export function buildLanguages(
 	locale: Locale,
 	alternates: Partial<Record<Locale, string>>,
-) {
+): LanguageOption[] {
 	return locales
 		.filter((candidate) => alternates[candidate] !== undefined)
 		.map((candidate) => ({
@@ -117,7 +153,7 @@ export function buildLanguages(
 		}));
 }
 
-export function buildThemeOptions(locale: Locale) {
+export function buildThemeOptions(locale: Locale): ThemeOption[] {
 	const names = {
 		system: m.settings_theme_system({}, { locale }),
 		light: m.settings_theme_light({}, { locale }),
@@ -127,6 +163,6 @@ export function buildThemeOptions(locale: Locale) {
 	return themes.map((value) => ({ value, name: names[value] }));
 }
 
-export function toTerminalPosts(posts: BlogEntry[]) {
+export function toTerminalPosts(posts: BlogEntry[]): TerminalPost[] {
 	return posts.map(({ file, title, href }) => ({ file, title, href }));
 }

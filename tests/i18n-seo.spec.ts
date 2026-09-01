@@ -16,11 +16,11 @@ test.describe('internationalisation', () => {
 	}) => {
 		await page.goto(routes.de.about);
 		await expect(page.locator('html')).toHaveAttribute('lang', 'de-DE');
-		await expect(page.locator('h2')).toHaveText('Servus, ich bin Kheder.');
+		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
 
 		await page.goto(routes.en.about);
 		await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
-		await expect(page.locator('h2')).toHaveText("Hi, I'm Kheder.");
+		await expect(page.locator('h1')).toHaveText("Hi, I'm Kheder.");
 	});
 
 	test('english routes use translated slugs', async ({ page }) => {
@@ -132,12 +132,25 @@ test.describe('SEO basics', () => {
 		});
 	}
 
-	test('exactly one h1 per page, above the visible h2', async ({ page }) => {
-		await page.goto(routes.de.about);
+	test('every page has exactly one h1 and it is the visible heading', async ({
+		page,
+	}) => {
+		const headings = [
+			[routes.de.about, 'Servus, ich bin Kheder.'],
+			[routes.de.blog, 'Blog'],
+			[routes.de.refs, 'Referenzen'],
+			[routes.de.contact, 'Sag hallo.'],
+			[routes.de.settings, 'Einstellungen'],
+			[routes.de.post, 'Voice Agents mit LiveKit'],
+		] as const;
 
-		await expect(page.locator('h1')).toHaveCount(1);
-		await expect(page.locator('h1')).toHaveText('Über mich — kheder.codes');
-		await expect(page.locator('h2')).toHaveCount(1);
+		for (const [path, heading] of headings) {
+			await page.goto(path);
+
+			await expect(page.locator('h1'), path).toHaveCount(1);
+			await expect(page.locator('h1'), path).toHaveText(heading);
+			await expect(page.locator('h1'), path).toBeVisible();
+		}
 	});
 
 	test('the home page h1 is the wordmark', async ({ page }) => {

@@ -43,7 +43,31 @@ wired up as a Vite plugin (see `astro.config.mjs`) rather than the SvelteKit int
   unprefixed (`/ueber-mich`) and English under a translated slug (`/en/about`). Add a route
   there and its menu entry, `hreflang` links and sitemap alternates follow.
 
+## Components
+Two layers, one component per file.
+
+- `src/components/ui/terminal/` is a context-free terminal kit: window chrome, prompt,
+  typed text, cursor, rows, choices, hint line, plus a `Typewriter` and an `Entrance`
+  state helper. These take props only and know nothing about kheder.codes — treat them
+  as a library you happen to keep in this repo, and do not import app modules into them.
+- `src/components/terminal/` composes that kit into this site's terminal. State lives in
+  one `TerminalSession` (`session.svelte.ts`) put into Svelte context by
+  `KhederTerminal.svelte`; subcomponents call `getSession()` instead of taking props.
+  Only `KhederTerminal.svelte` takes props, typed as `TerminalProps` in `src/lib/terminal.ts`.
+
+## Animations
+`<html transition:animate="none">` in `src/layouts/Base.astro` switches off the page-wide
+view-transition crossfade, so a navigation only animates genuinely new DOM (the `<section>`
+in `Section.astro`). Astro restarts CSS animations on persisted islands during a swap, so
+entry animations inside the terminal are gated on an `Entrance` flag that drops the class
+once it has played. Never put a bare `animate-*` class on anything that lives inside
+`transition:persist`.
+
 ## Testing
 `pnpm test` builds the site and runs Playwright against `astro preview`. Because
 `astro preview` daemonises itself, the server is started from `tests/global-setup.ts`
 instead of Playwright's `webServer` helper.
+
+`tests/transitions.spec.ts` records `animationstart` events to prove nothing replays on
+navigation. Wait for an entry animation's class to drop (`settled()`) before recording,
+otherwise the assertions race the timer.

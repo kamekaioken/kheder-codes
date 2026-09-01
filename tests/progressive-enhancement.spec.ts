@@ -25,13 +25,13 @@ test.describe('without JavaScript', () => {
 
 		await page.getByTestId('menu-refs').click(clickOptions);
 		await expect(page).toHaveURL(new RegExp(`${routes.de.refs}/?$`));
-		await expect(page.locator('h2')).toHaveText('Referenzen');
+		await expect(page.locator('h1')).toHaveText('Referenzen');
 	});
 
 	test('content pages render their copy', async ({ page }) => {
 		await page.goto(routes.de.about);
 
-		await expect(page.locator('h2')).toHaveText('Servus, ich bin Kheder.');
+		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
 		await expect(page.locator('main')).toContainText('12 Jahren Erfahrung');
 		await expect(page.locator('footer')).toBeVisible();
 	});
@@ -41,7 +41,7 @@ test.describe('without JavaScript', () => {
 
 		await page.getByTestId('lang-en').click(clickOptions);
 		await expect(page).toHaveURL(new RegExp(`${routes.en.settings}/?$`));
-		await expect(page.locator('h2')).toHaveText('Settings');
+		await expect(page.locator('h1')).toHaveText('Settings');
 	});
 
 	test('blog entries link to their article', async ({ page }) => {

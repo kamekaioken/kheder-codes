@@ -27,7 +27,6 @@ const alternates = await getPostTranslations(post.translationKey);
 	<Section
 		kicker={m.post_kicker({ file: post.file }, o)}
 		heading={post.title}
-		srTitle={`${post.title} — kheder.codes`}
 	>
 		<p class="m-0 text-[15px] leading-[1.8] text-dim">{m.post_body({}, o)}</p>
 		<p class="mt-[18px] text-[13px] text-dim">{m.post_back({}, o)}</p>

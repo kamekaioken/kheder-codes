@@ -63,7 +63,7 @@ test.describe('terminal as navigation', () => {
 
 		await page.keyboard.press('Enter');
 		await expect(page).toHaveURL(new RegExp(`${routes.de.refs}/?$`));
-		await expect(page.locator('h2')).toHaveText('Referenzen');
+		await expect(page.locator('h1')).toHaveText('Referenzen');
 	});
 
 	test('arrow keys wrap around the menu', async ({ page }) => {
@@ -80,7 +80,7 @@ test.describe('terminal as navigation', () => {
 
 		await page.keyboard.press('4');
 		await expect(page).toHaveURL(new RegExp(`${routes.de.contact}/?$`));
-		await expect(page.locator('h2')).toHaveText('Sag hallo.');
+		await expect(page.locator('h1')).toHaveText('Sag hallo.');
 	});
 
 	test('clicking a row navigates', async ({ page }) => {
@@ -89,7 +89,7 @@ test.describe('terminal as navigation', () => {
 
 		await page.getByTestId('menu-about').click();
 		await expect(page).toHaveURL(new RegExp(`${routes.de.about}/?$`));
-		await expect(page.locator('h2')).toHaveText('Servus, ich bin Kheder.');
+		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
 	});
 
 	test('donnadesk is an external link in a new tab', async ({ page }) => {
@@ -164,7 +164,7 @@ test.describe('blog submenu', () => {
 		await expect(page).toHaveURL(
 			new RegExp('/blog/monorepos-ohne-kopfschmerzen/?$'),
 		);
-		await expect(page.locator('h2')).toHaveText('Monorepos ohne Kopfschmerzen');
+		await expect(page.locator('h1')).toHaveText('Monorepos ohne Kopfschmerzen');
 	});
 
 	test('number keys open an article directly', async ({ page }) => {

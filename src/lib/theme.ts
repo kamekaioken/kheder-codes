@@ -4,8 +4,6 @@ export type Theme = (typeof themes)[number];
 
 export const themeStorageKey = 'kheder:theme';
 
-export const introStorageKey = 'kheder:intro-seen';
-
 export function isTheme(value: string | null): value is Theme {
 	return value !== null && (themes as readonly string[]).includes(value);
 }
