@@ -1,13 +1,15 @@
 import { navigate } from 'astro:transitions/client';
 import { createContext } from 'svelte';
-import type { TerminalProps } from '../../lib/terminal';
+import {
+	submenuOf,
+	type TerminalProps,
+	type TerminalRoute,
+} from '../../lib/terminal';
 import { BootSequence } from './boot.svelte';
 import { handleTerminalKey } from './keymap';
 import { SettingsPanel } from './settings.svelte';
 
 const DEFAULT_SPEED = 70;
-
-export type TerminalSubmenu = 'blog' | 'settings' | null;
 
 /**
  * What the kheder terminal knows about the page it is on: the menu, the current
@@ -45,6 +47,10 @@ export class TerminalSession {
 		return this.#props().posts;
 	}
 
+	get legalDocs() {
+		return this.#props().legalDocs;
+	}
+
 	get labels() {
 		return this.#props().labels;
 	}
@@ -61,33 +67,26 @@ export class TerminalSession {
 		return Boolean(this.#props().showIntro);
 	}
 
-	readonly submenu: TerminalSubmenu = $derived(
-		this.current === 'blog' || this.current === 'post'
-			? 'blog'
-			: this.current === 'settings'
-				? 'settings'
-				: null,
-	);
+	get homeHref() {
+		return this.#props().homeHref;
+	}
 
-	readonly activeItemId = $derived(
-		this.current === 'post' ? 'blog' : this.current,
-	);
+	get blogHref() {
+		return this.#props().blogHref;
+	}
 
-	readonly title = $derived(
-		this.submenu === 'blog'
-			? this.labels.titleBlog
-			: this.submenu === 'settings'
-				? this.labels.titleSettings
-				: this.labels.titleHome,
-	);
+	get legalHref() {
+		return this.#props().legalHref;
+	}
 
-	readonly hint = $derived(
-		this.submenu === 'blog'
-			? this.labels.hintBlog
-			: this.submenu === 'settings'
-				? this.labels.hintSettings
-				: this.labels.hintMain,
-	);
+	readonly submenu = $derived(submenuOf[this.current]);
+
+	/** A leaf route highlights the main-menu row of the submenu it sits in. */
+	readonly activeItemId = $derived(this.submenu ?? this.current);
+
+	readonly title = $derived(this.labels.titles[this.submenu ?? 'main']);
+
+	readonly hint = $derived(this.labels.hints[this.submenu ?? 'main']);
 
 	readonly #itemIndex = $derived(
 		Math.max(
@@ -103,9 +102,24 @@ export class TerminalSession {
 		),
 	);
 
+	readonly #legalIndex = $derived(
+		Math.max(
+			0,
+			this.legalDocs.findIndex((doc) => doc.id === this.current),
+		),
+	);
+
 	/** Cursors follow the route by default and stay put once moved by hand. */
 	selected = $derived(this.#itemIndex);
 	postSelected = $derived(this.#postIndex);
+	legalSelected = $derived(this.#legalIndex);
+
+	/** Leaf routes step back into their submenu, everything else to the main menu. */
+	readonly #parentHref: Partial<Record<TerminalRoute, string>> = $derived({
+		post: this.blogHref,
+		imprint: this.legalHref,
+		privacy: this.legalHref,
+	});
 
 	attach(): () => void {
 		this.settings.load();
@@ -136,7 +150,7 @@ export class TerminalSession {
 	resetToHero(): void {
 		this.boot.replay();
 		window.scrollTo({ top: 0 });
-		if (this.current !== 'home') navigate(this.#props().homeHref);
+		if (this.current !== 'home') navigate(this.homeHref);
 	}
 
 	go(href: string): void {
@@ -145,8 +159,9 @@ export class TerminalSession {
 	}
 
 	goBack(): void {
-		if (this.current === 'post') this.go(this.#props().blogHref);
-		else if (this.current !== 'home') this.go(this.#props().homeHref);
+		const parent = this.#parentHref[this.current];
+		if (parent) this.go(parent);
+		else if (this.current !== 'home') this.go(this.homeHref);
 		else this.resetToHero();
 	}
 
@@ -166,6 +181,13 @@ export class TerminalSession {
 		if (!post) return;
 		this.postSelected = index;
 		this.go(post.href);
+	}
+
+	openLegal(index: number): void {
+		const doc = this.legalDocs[index];
+		if (!doc) return;
+		this.legalSelected = index;
+		this.go(doc.href);
 	}
 }
 

@@ -15,7 +15,10 @@ export type RouteId =
 	| 'blog'
 	| 'refs'
 	| 'contact'
-	| 'settings';
+	| 'settings'
+	| 'legal'
+	| 'imprint'
+	| 'privacy';
 
 const routePaths: Record<RouteId, Record<Locale, string>> = {
 	home: { de: '/', en: '/en/' },
@@ -24,7 +27,15 @@ const routePaths: Record<RouteId, Record<Locale, string>> = {
 	refs: { de: '/referenzen', en: '/en/references' },
 	contact: { de: '/kontakt', en: '/en/contact' },
 	settings: { de: '/einstellungen', en: '/en/settings' },
+	legal: { de: '/rechtliches', en: '/rechtliches' },
+	imprint: { de: '/impressum', en: '/impressum' },
+	privacy: { de: '/datenschutz', en: '/datenschutz' },
 };
+
+/** Impressum and Datenschutzerklärung are binding in German, so there is one
+ *  version of each. Both menus link the same URL and no English alternate is
+ *  advertised. */
+const germanOnly = new Set<RouteId>(['legal', 'imprint', 'privacy']);
 
 export function pathFor(id: RouteId, locale: Locale): string {
 	return routePaths[id][locale];
@@ -42,6 +53,8 @@ export function assertLocale(value: string | undefined): Locale {
 	return isLocale(value) ? value : baseLocale;
 }
 
-export function alternatesFor(id: RouteId): Record<Locale, string> {
-	return { de: routePaths[id].de, en: routePaths[id].en };
+export function alternatesFor(id: RouteId): Partial<Record<Locale, string>> {
+	return germanOnly.has(id)
+		? { de: routePaths[id].de }
+		: { de: routePaths[id].de, en: routePaths[id].en };
 }

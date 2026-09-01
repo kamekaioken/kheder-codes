@@ -37,8 +37,9 @@ test.describe('internationalisation', () => {
 		await expect(page.getByTestId('menu-refs')).toContainText('references');
 		await expect(page.getByTestId('menu-contact')).toContainText('contact');
 		await expect(page.getByTestId('menu-settings')).toContainText('settings/');
+		await expect(page.getByTestId('menu-legal')).toContainText('legal/');
 		await expect(page.getByTestId('hint-line')).toHaveText(
-			'↑↓ select · ⏎ open · [1–6] direct · ⎋ back · or click',
+			'↑↓ select · ⏎ open · [1–7] direct · ⎋ back · or click',
 		);
 	});
 

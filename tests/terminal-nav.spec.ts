@@ -13,10 +13,11 @@ const menuCopy = [
 	['menu-contact', 'kontakt', 'Sag hallo'],
 	['menu-donna', 'donnadesk ↗', 'Mein Startup — öffnet donnadesk.de'],
 	['menu-settings', 'einstellungen/', 'Sprache & Theme'],
+	['menu-legal', 'rechtliches/', 'Impressum & Datenschutz'],
 ] as const;
 
 test.describe('terminal as navigation', () => {
-	test('shows the six menu options in order with the exact copy', async ({
+	test('shows the seven menu options in order with the exact copy', async ({
 		page,
 	}) => {
 		await page.goto(routes.de.about);
@@ -33,7 +34,7 @@ test.describe('terminal as navigation', () => {
 		}
 
 		await expect(page.getByTestId('hint-line')).toHaveText(
-			'↑↓ wählen · ⏎ öffnen · [1–6] direkt · ⎋ zurück · oder klicken',
+			'↑↓ wählen · ⏎ öffnen · [1–7] direkt · ⎋ zurück · oder klicken',
 		);
 	});
 
@@ -71,7 +72,7 @@ test.describe('terminal as navigation', () => {
 		await openTerminalFromHero(page);
 
 		await page.keyboard.press('ArrowUp');
-		await expect(page.getByTestId('menu-settings')).toHaveClass(/row-selected/);
+		await expect(page.getByTestId('menu-legal')).toHaveClass(/row-selected/);
 	});
 
 	test('number keys open a row directly', async ({ page }) => {

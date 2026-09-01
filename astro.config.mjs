@@ -3,12 +3,23 @@ import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://www.kheder.codes',
 	output: 'static',
+	fonts: [
+		{
+			provider: fontProviders.google(),
+			name: 'Montserrat',
+			cssVariable: '--font-montserrat',
+			weights: [800],
+			styles: ['normal'],
+			subsets: ['latin'],
+			fallbacks: ['sans-serif'],
+		},
+	],
 	i18n: {
 		defaultLocale: 'de',
 		locales: ['de', 'en'],

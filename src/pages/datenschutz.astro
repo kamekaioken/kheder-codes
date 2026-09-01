@@ -1,0 +1,9 @@
+---
+import { getEntry } from 'astro:content';
+import LegalDocView from '../components/views/LegalDocView.astro';
+
+const entry = await getEntry('legal', 'datenschutz');
+if (!entry) throw new Error('Missing legal document: datenschutz');
+---
+
+<LegalDocView locale="de" {entry} />

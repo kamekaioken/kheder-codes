@@ -1,0 +1,44 @@
+---
+import Base from '../../layouts/Base.astro';
+import { alternatesFor, type Locale } from '../../lib/i18n';
+import { getLegalDocs } from '../../lib/legal';
+import { m } from '../../paraglide/messages.js';
+import Section from '../Section.astro';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const o = { locale };
+const docs = await getLegalDocs();
+---
+
+<Base
+	{locale}
+	current="legal"
+	title={m.legal_title({}, o)}
+	description={m.legal_description({}, o)}
+	alternates={alternatesFor('legal')}
+>
+	<Section
+		kicker={m.legal_kicker({}, o)}
+		heading={m.legal_h2({}, o)}
+		headingSpace="mb-6"
+	>
+		<p class="m-0 mb-6 text-[15px] leading-[1.8] text-dim">{m.legal_intro({}, o)}</p>
+		<ul class="m-0 flex list-none flex-col gap-2.5 p-0">
+			{
+				docs.map((doc) => (
+					<li class="flex items-baseline gap-3.5 rounded-lg border border-dashed border-line px-4 py-3.5 text-dim">
+						<a href={doc.href} class="text-[13px]">
+							{doc.file}
+						</a>
+						<span class="ml-auto flex-none text-[13px]">{doc.title}</span>
+					</li>
+				))
+			}
+		</ul>
+		<p class="mt-[18px] text-[13px] text-dim">{m.legal_note({}, o)}</p>
+	</Section>
+</Base>

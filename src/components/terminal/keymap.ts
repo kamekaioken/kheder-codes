@@ -1,6 +1,15 @@
 import { cycle, digitIndex } from '../ui/terminal/navigation';
 import type { TerminalSession } from './session.svelte';
 
+/** The main menu and the blog and legal submenus are all lists of links, and
+ *  behave identically under the keyboard. */
+type LinkList = {
+	length: number;
+	selected: number;
+	select: (index: number) => void;
+	open: (index: number) => void;
+};
+
 function isTypingTarget(target: HTMLElement | null): boolean {
 	return Boolean(
 		target?.closest('input, textarea, select, [contenteditable="true"]'),
@@ -13,46 +22,56 @@ function step(key: string): -1 | 1 | 0 {
 	return 0;
 }
 
-function handleMenu(
-	session: TerminalSession,
-	event: KeyboardEvent,
-	onControl: boolean,
-): void {
-	const length = session.items.length;
-
-	if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-		event.preventDefault();
-		session.selected = cycle(session.selected, step(event.key), length);
-		return;
-	}
-	if (event.key === 'Enter' && !onControl) {
-		event.preventDefault();
-		session.open(session.selected);
-		return;
-	}
-	const index = digitIndex(event.key, length);
-	if (index !== null) session.open(index);
+function menuList(session: TerminalSession): LinkList {
+	return {
+		length: session.items.length,
+		selected: session.selected,
+		select: (index) => {
+			session.selected = index;
+		},
+		open: (index) => session.open(index),
+	};
 }
 
-function handleBlog(
-	session: TerminalSession,
+function postList(session: TerminalSession): LinkList {
+	return {
+		length: session.posts.length,
+		selected: session.postSelected,
+		select: (index) => {
+			session.postSelected = index;
+		},
+		open: (index) => session.openPost(index),
+	};
+}
+
+function legalList(session: TerminalSession): LinkList {
+	return {
+		length: session.legalDocs.length,
+		selected: session.legalSelected,
+		select: (index) => {
+			session.legalSelected = index;
+		},
+		open: (index) => session.openLegal(index),
+	};
+}
+
+function handleLinkList(
+	list: LinkList,
 	event: KeyboardEvent,
 	onControl: boolean,
 ): void {
-	const length = session.posts.length;
-
 	if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
 		event.preventDefault();
-		session.postSelected = cycle(session.postSelected, step(event.key), length);
+		list.select(cycle(list.selected, step(event.key), list.length));
 		return;
 	}
 	if (event.key === 'Enter' && !onControl) {
 		event.preventDefault();
-		session.openPost(session.postSelected);
+		list.open(list.selected);
 		return;
 	}
-	const index = digitIndex(event.key, length);
-	if (index !== null) session.openPost(index);
+	const index = digitIndex(event.key, list.length);
+	if (index !== null) list.open(index);
 }
 
 function handleSettings(
@@ -111,8 +130,10 @@ export function handleTerminalKey(
 
 	if (!session.boot.menuOn) return;
 
-	if (session.submenu === 'blog') handleBlog(session, event, onControl);
-	else if (session.submenu === 'settings')
-		handleSettings(session, event, onControl);
-	else handleMenu(session, event, onControl);
+	if (session.submenu === 'settings') handleSettings(session, event, onControl);
+	else if (session.submenu === 'blog')
+		handleLinkList(postList(session), event, onControl);
+	else if (session.submenu === 'legal')
+		handleLinkList(legalList(session), event, onControl);
+	else handleLinkList(menuList(session), event, onControl);
 }

@@ -9,6 +9,9 @@ export const routes = {
 		refs: '/referenzen',
 		contact: '/kontakt',
 		settings: '/einstellungen',
+		legal: '/rechtliches',
+		imprint: '/impressum',
+		privacy: '/datenschutz',
 	},
 	en: {
 		home: '/en/',
@@ -24,8 +27,8 @@ export const routes = {
 /** The main menu only becomes interactive once the staggered reveal has finished. */
 export async function waitForMenu(page: Page) {
 	await expect(page.getByTestId('terminal')).toBeVisible();
-	await expect(page.getByTestId('menu-settings')).toBeVisible();
-	await expect(page.getByTestId('menu-settings')).toHaveCSS('opacity', '1');
+	await expect(page.getByTestId('menu-legal')).toBeVisible();
+	await expect(page.getByTestId('menu-legal')).toHaveCSS('opacity', '1');
 }
 
 /** Plays the intro on `/` and lands in the terminal phase. */

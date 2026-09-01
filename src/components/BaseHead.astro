@@ -1,4 +1,5 @@
 ---
+import { Font } from 'astro:assets';
 import { ClientRouter } from 'astro:transitions';
 import { baseLocale, htmlLang, type Locale, locales } from '../lib/i18n';
 import ThemeInit from './ThemeInit.astro';
@@ -48,12 +49,7 @@ const defaultHref = alternateUrls.find(
 <meta name="twitter:card" content="summary" />
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-	rel="stylesheet"
-	href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap"
-/>
+<Font cssVariable="--font-montserrat" preload />
 
 <ThemeInit />
 <ClientRouter />

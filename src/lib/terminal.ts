@@ -1,6 +1,7 @@
 import { m } from '../paraglide/messages.js';
 import type { BlogEntry } from './blog';
 import { type Locale, locales, pathFor } from './i18n';
+import type { LegalDoc } from './legal';
 import { site } from './site';
 import { type Theme, themes } from './theme';
 
@@ -10,10 +11,12 @@ export type TerminalItem = {
 	desc: string;
 	href: string;
 	external: boolean;
-	submenu: 'blog' | 'settings' | null;
+	submenu: TerminalSubmenu;
 };
 
 export type TerminalPost = { file: string; title: string; href: string };
+
+export type TerminalLegalDoc = { id: string; file: string; href: string };
 
 export type LanguageOption = {
 	locale: Locale;
@@ -31,13 +34,34 @@ export type TerminalRoute =
 	| 'refs'
 	| 'contact'
 	| 'settings'
-	| 'post';
+	| 'post'
+	| 'legal'
+	| 'imprint'
+	| 'privacy';
+
+export type TerminalSubmenu = 'blog' | 'settings' | 'legal' | null;
+
+/** Which submenu a route opens. Leaf routes name the submenu they belong to,
+ *  which is also how the main menu knows which row to mark as current. */
+export const submenuOf: Record<TerminalRoute, TerminalSubmenu> = {
+	home: null,
+	about: null,
+	refs: null,
+	contact: null,
+	blog: 'blog',
+	post: 'blog',
+	settings: 'settings',
+	legal: 'legal',
+	imprint: 'legal',
+	privacy: 'legal',
+};
 
 export type TerminalLabels = ReturnType<typeof buildLabels>;
 
 export type TerminalProps = {
 	items: TerminalItem[];
 	posts: TerminalPost[];
+	legalDocs: TerminalLegalDoc[];
 	languages: LanguageOption[];
 	themeOptions: ThemeOption[];
 	labels: TerminalLabels;
@@ -46,6 +70,7 @@ export type TerminalProps = {
 	showIntro?: boolean;
 	homeHref: string;
 	blogHref: string;
+	legalHref: string;
 	typingSpeed?: number;
 };
 
@@ -101,10 +126,19 @@ export function buildMenu(locale: Locale): TerminalItem[] {
 			external: false,
 			submenu: 'settings',
 		},
+		{
+			id: 'legal',
+			name: m.menu_legal({}, o),
+			desc: m.menu_legal_desc({}, o),
+			href: pathFor('legal', locale),
+			external: false,
+			submenu: 'legal',
+		},
 	];
 }
 
-/** `blog/` and `einstellungen/` double as the commands echoed in the submenu prompt. */
+/** `blog/`, `einstellungen/` and `rechtliches/` double as the commands echoed in
+ *  the submenu prompt. */
 function commandOf(items: TerminalItem[], id: string): string {
 	return items.find((item) => item.id === id)?.name.replace(/\/$/, '') ?? id;
 }
@@ -113,24 +147,37 @@ export function buildLabels(locale: Locale, items: TerminalItem[]) {
 	const o = { locale };
 	const blogCmd = commandOf(items, 'blog');
 	const settingsCmd = commandOf(items, 'settings');
+	/* The legal documents live under one German path in both locales, so the
+	   echoed directory is fixed rather than taken from the translated menu row. */
+	const legalCmd = 'rechtliches';
 
 	return {
 		heroKey: m.hero_key({}, o),
 		heroHint: m.hero_hint({}, o),
 		closeTitle: m.term_close_title({}, o),
-		titleHome: m.term_title({ cwd: '~' }, o),
-		titleBlog: m.term_title({ cwd: `~/${blogCmd}` }, o),
-		titleSettings: m.term_title({ cwd: `~/${settingsCmd}` }, o),
+		/* Keyed by submenu, so the screen reads them as `titles[submenu ?? 'main']`. */
+		titles: {
+			main: m.term_title({ cwd: '~' }, o),
+			blog: m.term_title({ cwd: `~/${blogCmd}` }, o),
+			settings: m.term_title({ cwd: `~/${settingsCmd}` }, o),
+			legal: m.term_title({ cwd: `~/${legalCmd}` }, o),
+		},
+		hints: {
+			main: m.hint_main({}, o),
+			blog: m.hint_blog({}, o),
+			settings: m.hint_settings({}, o),
+			legal: m.hint_legal({}, o),
+		},
 		version: m.term_version({}, o),
 		choose: m.term_choose({}, o),
 		navLabel: m.term_nav_label({}, o),
-		hintMain: m.hint_main({}, o),
-		hintBlog: m.hint_blog({}, o),
-		hintSettings: m.hint_settings({}, o),
 		blogCmd,
 		blogCount: m.blog_submenu_count({}, o),
 		blogNavLabel: m.blog_submenu_label({}, o),
 		wip: m.badge_wip({}, o),
+		legalCmd,
+		legalCount: m.legal_submenu_count({}, o),
+		legalNavLabel: m.legal_submenu_label({}, o),
 		settingsCmd,
 		settingsIntro: m.settings_intro({}, o),
 		settingsLabel: m.settings_label({}, o),
@@ -165,4 +212,8 @@ export function buildThemeOptions(locale: Locale): ThemeOption[] {
 
 export function toTerminalPosts(posts: BlogEntry[]): TerminalPost[] {
 	return posts.map(({ file, title, href }) => ({ file, title, href }));
+}
+
+export function toTerminalLegalDocs(docs: LegalDoc[]): TerminalLegalDoc[] {
+	return docs.map(({ id, file, href }) => ({ id, file, href }));
 }

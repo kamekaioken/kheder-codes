@@ -4,12 +4,15 @@ import Footer from '../components/Footer.astro';
 import KhederTerminal from '../components/terminal/KhederTerminal.svelte';
 import { getPosts } from '../lib/blog';
 import { htmlLang, type Locale, pathFor } from '../lib/i18n';
+import { getLegalDocs } from '../lib/legal';
 import {
 	buildLabels,
 	buildLanguages,
 	buildMenu,
 	buildThemeOptions,
+	toTerminalLegalDocs,
 	toTerminalPosts,
+	type TerminalRoute,
 } from '../lib/terminal';
 import { m } from '../paraglide/messages.js';
 import '../styles/global.css';
@@ -18,7 +21,7 @@ interface Props {
 	locale: Locale;
 	title: string;
 	description: string;
-	current: 'home' | 'about' | 'blog' | 'refs' | 'contact' | 'settings' | 'post';
+	current: TerminalRoute;
 	alternates: Partial<Record<Locale, string>>;
 	currentPostFile?: string | null;
 }
@@ -35,6 +38,7 @@ const {
 const showIntro = current === 'home';
 const items = buildMenu(locale);
 const posts = await getPosts(locale);
+const legalDocs = await getLegalDocs();
 const labels = buildLabels(locale, items);
 ---
 
@@ -59,6 +63,7 @@ const labels = buildLabels(locale, items);
 				transition:persist="terminal"
 				{items}
 				posts={toTerminalPosts(posts)}
+				legalDocs={toTerminalLegalDocs(legalDocs)}
 				languages={buildLanguages(locale, alternates)}
 				themeOptions={buildThemeOptions(locale)}
 				{current}
@@ -67,13 +72,14 @@ const labels = buildLabels(locale, items);
 				{labels}
 				homeHref={pathFor('home', locale)}
 				blogHref={pathFor('blog', locale)}
+				legalHref={pathFor('legal', locale)}
 			/>
 
 			<main id="content" data-hide-on-hero>
 				<slot />
 			</main>
 
-			<Footer {locale} />
+			<Footer {locale} {legalDocs} />
 		</div>
 	</body>
 </html>

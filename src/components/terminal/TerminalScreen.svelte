@@ -6,6 +6,7 @@ import TerminalTitleBar from '../ui/terminal/TerminalTitleBar.svelte';
 import TerminalTrafficLights from '../ui/terminal/TerminalTrafficLights.svelte';
 import TerminalWindow from '../ui/terminal/TerminalWindow.svelte';
 import BlogSubmenu from './BlogSubmenu.svelte';
+import LegalSubmenu from './LegalSubmenu.svelte';
 import MainMenu from './MainMenu.svelte';
 import SettingsSubmenu from './SettingsSubmenu.svelte';
 import { getSession } from './session.svelte';
@@ -50,6 +51,10 @@ const session = getSession();
 
 				{#if session.submenu === 'settings'}
 					<SettingsSubmenu />
+				{/if}
+
+				{#if session.submenu === 'legal'}
+					<LegalSubmenu />
 				{/if}
 
 				<TerminalHint data-testid="hint-line">{session.hint}</TerminalHint>

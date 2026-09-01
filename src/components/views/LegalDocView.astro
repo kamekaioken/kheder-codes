@@ -1,0 +1,98 @@
+---
+import { type CollectionEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { alternatesFor, type Locale } from '../../lib/i18n';
+import { m } from '../../paraglide/messages.js';
+import Section from '../Section.astro';
+
+interface Props {
+	locale: Locale;
+	entry: CollectionEntry<'legal'>;
+}
+
+const { locale, entry } = Astro.props;
+const { Content } = await render(entry);
+
+const updated = new Intl.DateTimeFormat('de-DE', {
+	day: 'numeric',
+	month: 'long',
+	year: 'numeric',
+}).format(entry.data.updated);
+---
+
+<Base
+	{locale}
+	current={entry.data.route}
+	title={`${entry.data.title} — kheder.codes`}
+	description={entry.data.description}
+	alternates={alternatesFor(entry.data.route)}
+>
+	<Section
+		kicker={entry.data.kicker}
+		heading={entry.data.title}
+		headingSpace="mb-2"
+	>
+		<p class="mb-9 text-[13px] text-dim" data-testid="legal-updated">Stand: {updated}</p>
+
+		<div class="legal-prose">
+			<Content />
+		</div>
+
+		<p class="mt-9 text-[13px] text-dim">{m.legal_back({}, { locale })}</p>
+	</Section>
+</Base>
+
+<style>
+	.legal-prose {
+		font-size: 15px;
+		line-height: 1.8;
+		color: var(--color-dim);
+	}
+
+	.legal-prose :global(h2) {
+		margin: 40px 0 12px;
+		font-size: 17px;
+		font-weight: 700;
+		color: var(--color-fg);
+	}
+
+	.legal-prose :global(h3) {
+		margin: 28px 0 10px;
+		font-size: 15px;
+		font-weight: 700;
+		color: var(--color-fg);
+	}
+
+	.legal-prose :global(:is(h2, h3):first-child) {
+		margin-top: 0;
+	}
+
+	.legal-prose :global(p),
+	.legal-prose :global(address) {
+		margin: 0 0 14px;
+		font-style: normal;
+	}
+
+	/* Tailwind's preflight strips list markers; the legal lists want them back. */
+	.legal-prose :global(ul) {
+		margin: 0 0 14px;
+		padding-left: 20px;
+		list-style: disc;
+	}
+
+	.legal-prose :global(li) {
+		margin-bottom: 4px;
+	}
+
+	.legal-prose :global(strong) {
+		font-weight: 700;
+		color: var(--color-fg);
+	}
+
+	.legal-prose :global(code) {
+		border: 1px solid var(--color-line);
+		border-radius: 4px;
+		padding: 1px 5px;
+		font-size: 13px;
+	}
+</style>
