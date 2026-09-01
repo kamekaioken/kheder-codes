@@ -1,0 +1,71 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"categories": {
+		"correctness": "error",
+		"suspicious": "warn"
+	},
+	"plugins": ["typescript", "unicorn", "oxc", "import"],
+	"rules": {
+		// Biome had noNonNullAssertion: off — keep the same
+		"typescript/no-non-null-assertion": "off",
+		// Import sorting is handled by Biome formatter
+		"sort-imports": "off",
+		// Empty files are ok (e.g. SvelteKit $lib/index.ts)
+		"unicorn/no-empty-file": "off",
+		// Side-effect imports are common (CSS, polyfills, dotenv)
+		"import/no-unassigned-import": "off",
+		// Zod re-exports `z` as default; common pattern
+		"import/no-named-as-default": "off",
+		// Too many legitimate callback/closure shadowing patterns
+		"no-shadow": "off"
+	},
+	"ignorePatterns": [
+		"**/dist",
+		"**/node_modules",
+		"**/.svelte-kit",
+		// Astro's generated types (`astro sync`, run by `astro check`/`build`).
+		// Ignored for the same reason as .svelte-kit: without it, lint results
+		// depend on whether the app happens to have been built locally.
+		"**/.astro",
+		"**/paraglide"
+	],
+	"overrides": [
+		{
+			"files": ["**/*.svelte"],
+			"rules": {
+				// Svelte 5 $props() requires `let` destructuring
+				"prefer-const": "off",
+				// Svelte reactive variables may appear unused to the linter
+				"no-unused-vars": "off",
+				// Svelte component imports are used in templates, not JS
+				"typescript/consistent-type-imports": "off",
+				// Svelte event handlers use on* attributes
+				"unicorn/prefer-add-event-listener": "off"
+			}
+		},
+		{
+			"files": ["**/__tests__/**"],
+			"rules": {
+				// Test files often have unused imports for setup
+				"no-unused-vars": "off"
+			}
+		},
+		{
+			"files": ["**/*.d.ts"],
+			"rules": {
+				// SvelteKit app.d.ts uses `export {}` to declare module scope
+				"unicorn/require-module-specifiers": "off",
+				// A triple-slash reference is the only mechanism that pulls in another
+				// declaration file WITHOUT turning the referrer into a module. Rewriting
+				// apps/website/src/env.d.ts's `/// <reference path="../.astro/types.d.ts" />`
+				// as an `import` would give the file top-level module syntax, and its
+				// global `ImportMetaEnv` / `ImportMeta` / `Window` interfaces would stop
+				// being global — so the rule's advice does not apply to ambient .d.ts.
+				"typescript/triple-slash-reference": "off"
+			}
+		}
+	],
+	"env": {
+		"builtin": true
+	}
+}
