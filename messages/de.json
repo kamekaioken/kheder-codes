@@ -45,7 +45,7 @@
 	"settings_theme_dark": "dark",
 	"settings_kicker": "$ kheder --einstellungen",
 	"settings_h2": "Einstellungen",
-	"settings_body": "Sprache und Darstellung stellst du direkt im Terminal oben ein. Deine Auswahl wird lokal in diesem Browser gespeichert — kein Cookie-Banner, kein Tracking.",
+	"settings_body": "Sprache und Darstellung stellst du direkt im Terminal ein. Deine Auswahl wird lokal in diesem Browser gespeichert — kein Cookie-Banner, kein Tracking.",
 	"settings_title": "Einstellungen — kheder.codes",
 	"settings_description": "Sprache (deutsch/english) und Theme (system/light/dark) für kheder.codes einstellen.",
 	"home_kicker": "$ whoami",

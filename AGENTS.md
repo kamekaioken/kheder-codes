@@ -61,18 +61,27 @@ Two layers, one component per file.
   in the piece it belongs to, not in the session.
 
 ## Layout
-The page is an IDE shell: the content column scrolls underneath a terminal docked to the
-bottom edge. `[data-dock]` is only fixed under `:root[data-js="on"]`, so without JavaScript
-the panel stays in the flow as the last block of the document. It measures itself into
-`--dock-h` and `[data-shell]` keeps exactly that much room free at the bottom — nothing
-needs its own spacing to clear the dock.
+The page is an IDE shell. From 1080px up the terminal takes a column of its own on
+the left and the page reads beside it; below that it lies along the bottom edge and
+the page scrolls behind it. Both are pure CSS in `global.css` — `[data-dock]` is only
+positioned under `:root[data-js="on"]`, so without JavaScript the panel stays in the
+flow as the last block of the document. Lying at the bottom it measures itself into
+`--dock-h` and `[data-shell]` keeps that much room free; in its own column the shell
+keeps `--dock-w` free on the left instead. Nothing needs its own spacing to clear it.
 
-The panel is open on a wide screen and folds to its title bar through the yellow traffic
-light, the chevron, or a click on the bar itself. On a phone `TerminalDock` opens it only
-where the menu is still the point — the home screen and the submenus — and leaves a content
-page to be read against the bar alone; a manual toggle holds until the route changes.
-Because the dock never scrolls away, the arrows drive the menu from the page and are handed
-back to the browser as soon as the focus sits inside `[data-content]`.
+Only the bottom panel can be folded away — through the yellow traffic light, the
+chevron, or a click on the title bar — because only there does it cover anything;
+`TerminalDock` mirrors the same two media queries in `side` and `compact`. On a phone
+it folds itself, staying open only where the menu is still the point (the home screen
+and the submenus) and leaving a content page to be read against the title bar alone;
+a manual toggle holds until the route changes. Because the dock never scrolls away,
+the arrows drive the menu from the page and are handed back to the browser as soon as
+the focus sits inside `[data-content]`.
+
+The intro is an opaque cover over the page (`[data-hero]`, fixed, fading out in the
+term phase), not a switch that removes it, so the home copy stays in the rendered
+document for crawlers. `boot.syncPhase()` makes `[data-shell]` `inert` for as long as
+it is covered, so the keyboard and screen readers cannot wander underneath.
 
 ## Animations
 `<html transition:animate="none">` in `src/layouts/Base.astro` switches off the page-wide

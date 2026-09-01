@@ -10,7 +10,7 @@ const session = getSession();
 <div
 	data-hero
 	data-testid="hero"
-	class="flex min-h-dvh cursor-pointer flex-col items-center justify-center p-6 select-none"
+	class="flex min-h-dvh cursor-pointer flex-col items-center justify-center bg-page p-6 select-none"
 	onclick={() => session.boot.openTerminal()}
 >
 	<HeroWordmark />

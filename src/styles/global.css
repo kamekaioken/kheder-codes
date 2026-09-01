@@ -25,9 +25,6 @@
 	--shadow-term:
 		0 24px 70px light-dark(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.55)),
 		0 2px 8px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.4));
-	--shadow-dock:
-		0 -16px 44px light-dark(rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.55)),
-		0 -2px 8px light-dark(rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.35));
 	--shadow-key: 0 2px 0 var(--color-line);
 	--shadow-tl-red: 0 0 0 3px rgba(255, 95, 87, 0.3);
 	--shadow-tl-yellow: 0 0 0 3px rgba(254, 188, 46, 0.3);
@@ -127,15 +124,28 @@
 	filter: var(--logo-filter);
 }
 
-/* The shell: with JavaScript the terminal is docked to the bottom edge and the
-   page scrolls behind it, so the content column keeps the panel's measured
-   height free underneath. Without it the panel stays in the flow, where it is
-   simply the last block of the document. */
+/* The dock's own measurements: the width of its column on a wide screen, and the
+   shadow it casts on the page from whichever edge it sits. */
+:root {
+	--dock-w: clamp(360px, 30vw, 440px);
+	--shadow-dock:
+		0 -16px 44px light-dark(rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.55)),
+		0 -2px 8px light-dark(rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.35));
+	--shadow-side:
+		18px 0 44px light-dark(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.5)),
+		2px 0 8px light-dark(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.3));
+}
+
+/* The shell. With JavaScript the terminal is pinned to the bottom edge and the
+   page scrolls behind it; from 1080px up it moves into a column of its own on the
+   left, IDE-style, and the page keeps that column free instead. Without
+   JavaScript the panel stays in the flow as the last block of the document. */
 :root[data-js="on"] [data-dock] {
 	position: fixed;
 	inset-inline: 0;
 	bottom: 0;
 	z-index: 20;
+	scrollbar-width: thin;
 }
 
 :root[data-js="on"] {
@@ -146,17 +156,84 @@
 	padding-bottom: var(--dock-h, 0px);
 }
 
+[data-dock] .dock-window {
+	border-bottom-width: 0;
+	border-radius: 12px 12px 0 0;
+	box-shadow: var(--shadow-dock);
+}
+
+@media (width >= 1080px) {
+	:root[data-js="on"] [data-dock] {
+		inset: 0 auto 0 0;
+		width: var(--dock-w);
+		max-width: none;
+		padding: 0;
+	}
+
+	:root[data-js="on"] {
+		scroll-padding-bottom: 0;
+	}
+
+	:root[data-js="on"] [data-shell] {
+		padding-bottom: 0;
+		padding-inline-start: var(--dock-w);
+	}
+
+	:root[data-js="on"] [data-dock] .dock-window {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		border-width: 0 1px 0 0;
+		border-radius: 0;
+		box-shadow: var(--shadow-side);
+	}
+
+	:root[data-js="on"] [data-dock] .dock-panel {
+		flex: 1;
+		min-height: 0;
+	}
+
+	:root[data-js="on"] [data-dock] .dock-body {
+		max-height: none;
+		height: 100%;
+	}
+
+	/* A panel with a column to itself covers nothing, so there is nothing to fold
+	   away either. */
+	:root[data-js="on"] [data-dock] .dock-toggle {
+		display: none;
+	}
+}
+
 /* Progressive reveal. Without JS every element stays visible, so the full
    wordmark, menu and content are in the served HTML for crawlers. */
 :root[data-js="on"] [data-typed="false"] {
 	display: none;
 }
 
-:root[data-js="on"][data-phase="hero"] [data-terminal],
-:root[data-js="on"][data-phase="hero"] [data-hide-on-hero] {
+/* The intro is an opaque cover over the page rather than a switch that removes
+   it, so the copy underneath stays in the rendered document. It fades out of the
+   way when the terminal opens. */
+:root[data-js="on"] [data-hero] {
+	position: fixed;
+	inset: 0;
+	z-index: 30;
+	transition:
+		opacity 0.35s ease,
+		visibility 0s;
+}
+
+:root[data-js="on"][data-phase="hero"] body {
+	overflow: hidden;
+}
+
+:root[data-js="on"][data-phase="hero"] [data-terminal] {
 	display: none;
 }
 
 :root[data-js="on"][data-phase="term"] [data-hero] {
-	display: none;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition-delay: 0s, 0.35s;
 }

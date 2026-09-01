@@ -166,10 +166,10 @@ test.describe('design tokens', () => {
 		).toHaveCSS('color', 'rgb(90, 200, 250)');
 	});
 
-	test('the terminal is docked at 840px with the specified chrome', async ({
+	test('the terminal keeps its 840px window and its chrome on a narrow screen', async ({
 		page,
 	}) => {
-		await page.setViewportSize({ width: 1200, height: 900 });
+		await page.setViewportSize({ width: 1000, height: 900 });
 		await page.goto(routes.de.refs);
 
 		const box = await page.getByTestId('terminal').boundingBox();

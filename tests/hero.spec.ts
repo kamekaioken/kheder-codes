@@ -88,17 +88,35 @@ test.describe('hero intro', () => {
 		await expect(page).toHaveURL(new RegExp('/$'));
 		await expect(page.locator('html')).toHaveAttribute('data-phase', 'hero');
 		await expect(page.getByTestId('hero')).toBeVisible();
-		await expect(page.locator('footer')).toBeHidden();
+		await expect(page.locator('[data-shell]')).toHaveAttribute('inert', '');
 	});
 
-	test('the footer stays hidden during the intro and appears with the terminal', async ({
-		page,
-	}) => {
+	// The intro is an opaque cover rather than a switch that removes the page, so
+	// the copy underneath stays in the rendered document for crawlers — and out of
+	// reach for everyone else until the terminal opens.
+	test('the intro covers the page instead of removing it', async ({ page }) => {
 		await page.goto('/');
-		const footer = page.locator('footer');
-		await expect(footer).toBeHidden();
+
+		const shell = page.locator('[data-shell]');
+		await expect(shell).toHaveAttribute('inert', '');
+		await expect(shell).toContainText('Servus, ich bin Kheder.');
+
+		const viewport = page.viewportSize();
+		const hero = await page.getByTestId('hero').boundingBox();
+		expect(hero?.width).toBeCloseTo(viewport?.width ?? 0, 0);
+		expect(hero?.height).toBeCloseTo(viewport?.height ?? 0, 0);
 
 		await openTerminalFromHero(page);
+
+		await expect(shell).not.toHaveAttribute('inert', '');
+		await expect(page.getByTestId('hero')).toBeHidden();
+	});
+
+	test('the footer comes into reach with the terminal', async ({ page }) => {
+		await page.goto('/');
+		await openTerminalFromHero(page);
+
+		const footer = page.locator('footer');
 		await expect(footer).toBeVisible();
 		await expect(footer).toContainText('© 2026 kheder.codes');
 		await expect(footer).toContainText('exit 0');

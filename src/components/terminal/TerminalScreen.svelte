@@ -39,8 +39,10 @@ $effect(() => {
 });
 
 /** The title bar doubles as the handle, so a click anywhere but on one of its
- *  buttons folds the panel away. */
+ *  buttons folds the panel away — until it has a column of its own, where there
+ *  is nothing to fold. */
 function onBarClick(event: MouseEvent) {
+	if (dock.side) return;
 	if ((event.target as HTMLElement).closest('button')) return;
 	dock.toggle();
 }
@@ -59,9 +61,9 @@ function onBarClick(event: MouseEvent) {
 		session.boot.entrance.active && 'animate-fade-up',
 	]}
 >
-	<TerminalWindow docked class="pb-[env(safe-area-inset-bottom)]">
+	<TerminalWindow class="dock-window pb-[env(safe-area-inset-bottom)]">
 		<TerminalTitleBar
-			class="cursor-pointer"
+			class={dock.side ? undefined : 'cursor-pointer'}
 			data-testid="dock-bar"
 			onclick={onBarClick}
 		>
@@ -69,15 +71,15 @@ function onBarClick(event: MouseEvent) {
 				<TerminalTrafficLights
 					closeLabel={session.labels.closeTitle}
 					onclose={() => session.resetToHero()}
-					minimizeLabel={session.labels.minimizeTitle}
-					onminimize={() => dock.toggle()}
+					minimizeLabel={dock.side ? undefined : session.labels.minimizeTitle}
+					onminimize={dock.side ? undefined : () => dock.toggle()}
 				/>
 			{/snippet}
 
 			{#snippet actions()}
 				<button
 					type="button"
-					class="cursor-pointer px-1 text-[13px] leading-none text-dim"
+					class="dock-toggle cursor-pointer px-1 text-[13px] leading-none text-dim"
 					aria-expanded={dock.open}
 					aria-controls="terminal-body"
 					aria-label={toggleLabel}
@@ -91,7 +93,7 @@ function onBarClick(event: MouseEvent) {
 		</TerminalTitleBar>
 
 		<div
-			class="grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none"
+			class="dock-panel grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none"
 			style:grid-template-rows={dock.open ? '1fr' : '0fr'}
 		>
 			<div
@@ -101,7 +103,10 @@ function onBarClick(event: MouseEvent) {
 				]}
 				inert={!dock.open}
 			>
-				<div id="terminal-body" class="flex max-h-[min(50dvh,460px)] flex-col">
+				<div
+					id="terminal-body"
+					class="dock-body flex max-h-[min(50dvh,460px)] flex-col"
+				>
 					<div
 						bind:this={body}
 						class="min-h-0 flex-1 overflow-y-auto overscroll-contain"

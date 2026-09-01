@@ -2,6 +2,9 @@ import { expect, type Page, test } from '@playwright/test';
 import { openTerminalFromHero, routes, waitForMenu } from './helpers';
 
 const phone = { width: 390, height: 844 } as const;
+/** Narrow enough that the terminal lies along the bottom edge instead of taking
+ *  a column of its own. */
+const narrow = { width: 960, height: 800 } as const;
 
 function dock(page: Page) {
 	return page.getByTestId('terminal');
@@ -26,7 +29,9 @@ function viewportHeight(page: Page) {
 	return page.evaluate(() => window.innerHeight);
 }
 
-test.describe('the docked terminal', () => {
+test.describe('the terminal along the bottom edge', () => {
+	test.use({ viewport: narrow });
+
 	test('sits on the bottom edge of the viewport and stays there while scrolling', async ({
 		page,
 	}) => {
@@ -77,6 +82,8 @@ test.describe('the docked terminal', () => {
 });
 
 test.describe('folding the panel away', () => {
+	test.use({ viewport: narrow });
+
 	test('the chevron collapses the panel to its title bar and back', async ({
 		page,
 	}) => {
@@ -137,6 +144,56 @@ test.describe('folding the panel away', () => {
 
 		await expect(page.getByTestId('menu-home')).toBeHidden();
 		await expect(page.getByTestId('menu-home')).not.toBeFocused();
+	});
+});
+
+test.describe('the terminal in its own column', () => {
+	test('stands on the left, full height, with the page beside it', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.refs);
+		await settled(page);
+
+		const viewport = page.viewportSize();
+		const box = await dockBox(page);
+
+		expect(box.x).toBe(0);
+		expect(box.y).toBe(0);
+		expect(box.height).toBeCloseTo(viewport?.height ?? 0, 0);
+		expect(box.width).toBeLessThan((viewport?.width ?? 0) / 2);
+
+		const heading = await page.locator('h1').boundingBox();
+		expect(heading?.x ?? 0).toBeGreaterThanOrEqual(box.width);
+	});
+
+	test('covers nothing, so it offers no way to fold it away', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.refs);
+		await settled(page);
+
+		await expect(page.getByTestId('dock-toggle')).toBeHidden();
+		await expect(page.getByRole('button', { name: 'Minimieren' })).toHaveCount(
+			0,
+		);
+
+		await page.getByTestId('dock-bar').click();
+		await expect(page.getByTestId('menu-home')).toBeVisible();
+	});
+
+	test('the page keeps the column free instead of the bottom edge', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.refs);
+		await settled(page);
+
+		const shell = page.locator('[data-shell]');
+		await expect(shell).toHaveCSS('padding-bottom', '0px');
+		await expect(shell).not.toHaveCSS('padding-left', '0px');
+
+		await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+		const footer = await page.locator('footer').boundingBox();
+		expect(footer?.x ?? 0).toBeGreaterThanOrEqual((await dockBox(page)).width);
 	});
 });
 
@@ -205,7 +262,7 @@ test.describe('on a phone', () => {
 });
 
 test.describe('the home page', () => {
-	test('is the root of the menu and reads above the terminal', async ({
+	test('is the root of the menu and reads beside the terminal', async ({
 		page,
 	}) => {
 		await page.goto(routes.de.home);
@@ -221,8 +278,10 @@ test.describe('the home page', () => {
 
 		const heading = page.locator('h1');
 		await expect(heading).toHaveText('Servus, ich bin Kheder.');
-		expect((await heading.boundingBox())?.y ?? 0).toBeLessThan(
-			(await dockBox(page)).y,
+
+		const box = await dockBox(page);
+		expect((await heading.boundingBox())?.x ?? 0).toBeGreaterThanOrEqual(
+			box.width,
 		);
 	});
 });

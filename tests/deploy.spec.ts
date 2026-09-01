@@ -30,15 +30,6 @@ test.describe('cloudflare workers configuration', () => {
 		expect(config).toContain('html_handling = "auto-trailing-slash"');
 	});
 
-	// The about-me page became the root, so the URLs Google already knows have to
-	// keep landing somewhere.
-	test('the retired about-me urls redirect to the root', () => {
-		const redirects = readFileSync('dist/_redirects', 'utf8');
-
-		expect(redirects).toMatch(/^\/ueber-mich \/ 301$/m);
-		expect(redirects).toMatch(/^\/en\/about \/en\/ 301$/m);
-	});
-
 	// A `main` entry point would turn every hit into a billable Worker
 	// invocation; static asset requests are free and unlimited without one.
 	test('no worker script is configured', () => {

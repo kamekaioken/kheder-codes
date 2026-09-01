@@ -102,8 +102,14 @@ export class BootSequence {
 		this.hero.start();
 	}
 
+	/** The intro covers the page instead of removing it, so that its copy stays in
+	 *  the document for crawlers. Everything underneath is made inert for as long
+	 *  as it is covered, so the keyboard and screen readers cannot wander into it. */
 	syncPhase(): void {
 		document.documentElement.dataset.phase = this.phase;
+		for (const covered of document.querySelectorAll('[data-shell]')) {
+			(covered as HTMLElement).inert = this.phase === 'hero';
+		}
 	}
 
 	dispose(): void {
