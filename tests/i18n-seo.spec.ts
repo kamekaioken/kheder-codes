@@ -3,10 +3,11 @@ import { openTerminalFromHero, routes } from './helpers';
 
 const pairs = [
 	['home', routes.de.home, routes.en.home],
+	['team', routes.de.team, routes.en.team],
+	['member', routes.de.member, routes.en.member],
 	['blog', routes.de.blog, routes.en.blog],
 	['refs', routes.de.refs, routes.en.refs],
 	['contact', routes.de.contact, routes.en.contact],
-	['settings', routes.de.settings, routes.en.settings],
 ] as const;
 
 test.describe('internationalisation', () => {
@@ -15,11 +16,13 @@ test.describe('internationalisation', () => {
 	}) => {
 		await page.goto(routes.de.home);
 		await expect(page.locator('html')).toHaveAttribute('lang', 'de-DE');
-		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
+		await expect(page.locator('h1')).toHaveText(
+			'Servus, wir sind KHEDER.codes.',
+		);
 
 		await page.goto(routes.en.home);
 		await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
-		await expect(page.locator('h1')).toHaveText("Hi, I'm Kheder.");
+		await expect(page.locator('h1')).toHaveText("Hi, we're KHEDER.codes.");
 	});
 
 	test('english routes use translated slugs', async ({ page }) => {
@@ -32,15 +35,14 @@ test.describe('internationalisation', () => {
 	test('the english terminal menu is translated', async ({ page }) => {
 		await page.goto(routes.en.refs);
 
-		await expect(page.getByTestId('menu-home')).toContainText(
-			'Who I am & what I work with',
-		);
+		await expect(page.getByTestId('menu-home')).toContainText('Who we are');
+		await expect(page.getByTestId('menu-team')).toContainText('team/');
 		await expect(page.getByTestId('menu-refs')).toContainText('references');
 		await expect(page.getByTestId('menu-contact')).toContainText('contact');
 		await expect(page.getByTestId('menu-settings')).toContainText('settings/');
 		await expect(page.getByTestId('menu-legal')).toContainText('legal/');
 		await expect(page.getByTestId('hint-line')).toHaveText(
-			'↑↓ select · ⏎ open · [1–7] direct · ⎋ back · or click',
+			'↑↓ select · ⏎ open · [1–8] direct · ⎋ back · or click',
 		);
 	});
 
@@ -51,13 +53,13 @@ test.describe('internationalisation', () => {
 			'href',
 			routes.en.home,
 		);
+		await expect(page.getByTestId('menu-team')).toHaveAttribute(
+			'href',
+			routes.en.team,
+		);
 		await expect(page.getByTestId('menu-refs')).toHaveAttribute(
 			'href',
 			routes.en.refs,
-		);
-		await expect(page.getByTestId('menu-settings')).toHaveAttribute(
-			'href',
-			routes.en.settings,
 		);
 	});
 
@@ -70,6 +72,20 @@ test.describe('internationalisation', () => {
 		await expect(page.getByTestId('blog-submenu')).toContainText('in progress');
 		await expect(page.locator('main')).toContainText(
 			'Nothing published yet — the first articles are in progress.',
+		);
+	});
+
+	test('the english team profiles are translated', async ({ page }) => {
+		await page.goto(routes.en.member);
+
+		await expect(page.locator('h1')).toHaveText('Marlen Kheder');
+		await expect(page.getByTestId('member-role')).toHaveText(
+			'Full-stack & voice AI',
+		);
+		await expect(page.locator('main h2').first()).toHaveText('What I work on');
+		await expect(page.getByTestId('doc-next')).toHaveAttribute(
+			'href',
+			'/en/team/alan-kerkuki',
 		);
 	});
 
@@ -102,13 +118,14 @@ test.describe('internationalisation', () => {
 
 test.describe('SEO basics', () => {
 	const expected = [
-		[routes.de.home, 'kheder.codes — freiberuflicher Softwareentwickler'],
+		[routes.de.home, 'kheder.codes — Softwareentwicklung aus Nürnberg'],
+		[routes.de.team, 'Team — kheder.codes'],
+		[routes.de.member, 'Marlen Kheder — kheder.codes'],
 		[routes.de.blog, 'Blog — kheder.codes'],
 		[routes.de.refs, 'Referenzen — kheder.codes'],
 		[routes.de.contact, 'Kontakt — kheder.codes'],
-		[routes.de.settings, 'Einstellungen — kheder.codes'],
 		[routes.de.post, 'Voice Agents mit LiveKit — kheder.codes'],
-		[routes.en.home, 'kheder.codes — freelance software developer'],
+		[routes.en.home, 'kheder.codes — software development from Nuremberg'],
 	] as const;
 
 	for (const [path, title] of expected) {
@@ -135,14 +152,17 @@ test.describe('SEO basics', () => {
 		});
 	}
 
-	test('every page has exactly one h1 and it is the visible heading', async ({
+	// The outline belongs to the page column: the terminal beside it carries the
+	// menu, and not a single heading.
+	test('every page has exactly one h1, in the content and never in the terminal', async ({
 		page,
 	}) => {
 		const headings = [
+			[routes.de.team, 'Team'],
+			[routes.de.member, 'Marlen Kheder'],
 			[routes.de.blog, 'Blog'],
 			[routes.de.refs, 'Referenzen'],
 			[routes.de.contact, 'Sag hallo.'],
-			[routes.de.settings, 'Einstellungen'],
 			[routes.de.post, 'Voice Agents mit LiveKit'],
 		] as const;
 
@@ -152,6 +172,11 @@ test.describe('SEO basics', () => {
 			await expect(page.locator('h1'), path).toHaveCount(1);
 			await expect(page.locator('h1'), path).toHaveText(heading);
 			await expect(page.locator('h1'), path).toBeVisible();
+			await expect(page.locator('main h1'), path).toHaveCount(1);
+			await expect(
+				page.locator('[data-testid="terminal"] :is(h1,h2,h3,h4,h5,h6)'),
+				path,
+			).toHaveCount(0);
 		}
 	});
 
@@ -162,9 +187,12 @@ test.describe('SEO basics', () => {
 		await openTerminalFromHero(page);
 
 		await expect(page.locator('h1')).toHaveCount(1);
-		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
-		await expect(page.locator('h1')).toBeVisible();
+		await expect(page.locator('h1')).toHaveText(
+			'Servus, wir sind KHEDER.codes.',
+		);
+		await expect(page.locator('main h1')).toHaveCount(1);
 		await expect(page.getByTestId('wordmark')).toHaveText(/KHEDER\s*\.codes/);
+		await expect(page.getByTestId('wordmark')).toHaveJSProperty('tagName', 'P');
 	});
 
 	test('sitemap and robots are published', async ({ request }) => {
@@ -179,6 +207,8 @@ test.describe('SEO basics', () => {
 		const xml = await sitemap.text();
 		expect(xml).toContain('https://www.kheder.codes/referenzen');
 		expect(xml).toContain('https://www.kheder.codes/en/references');
-		expect(xml).not.toContain('/ueber-mich');
+		expect(xml).toContain('https://www.kheder.codes/team');
+		expect(xml).toContain('https://www.kheder.codes/team/marlen-kheder');
+		expect(xml).not.toContain('/einstellungen');
 	});
 });

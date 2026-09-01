@@ -16,6 +16,15 @@ test.describe('cloudflare workers configuration', () => {
 		expect(headers()).toContain('Strict-Transport-Security: max-age=31536000');
 	});
 
+	// Settings lost its page; the paths it used to live at are redirected at the
+	// edge rather than left to 404.
+	test('the retired settings paths are redirected', () => {
+		const redirects = readFileSync('dist/_redirects', 'utf8');
+
+		expect(redirects).toMatch(/^\/einstellungen\s+\/\s+301$/m);
+		expect(redirects).toMatch(/^\/en\/settings\s+\/en\/\s+301$/m);
+	});
+
 	test('fingerprinted assets are cached immutably', () => {
 		expect(headers()).toMatch(
 			/\/_astro\/\*\n\s+Cache-Control: public, max-age=31536000, immutable/,

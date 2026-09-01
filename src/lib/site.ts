@@ -12,21 +12,88 @@ export const site = {
 export const skillGroups = [
 	{
 		id: 'languages',
-		items: ['TypeScript', 'C#', '.NET', 'Angular', 'React', 'Svelte'],
+		items: ['TypeScript', 'C#', '.NET', 'Angular', 'Svelte', 'React'],
 	},
-	{ id: 'runtime', items: ['Bun', 'Node.js', 'Next.js', 'Astro', 'Monorepos'] },
-	{ id: 'ai', items: ['LiveKit', 'Voice Agents', 'AI Inference'] },
+	{
+		id: 'runtime',
+		items: ['Bun', 'Node.js', 'Astro', 'SvelteKit', 'Nx', 'Pulumi'],
+	},
+	{ id: 'ai', items: ['LiveKit', 'Voice Agents', 'Realtime Audio'] },
 ] as const;
 
+export type ReferenceId = 'donna' | 'hannover' | 'giz' | 'wts' | 'dzr';
+
 type Reference = {
-	id: 'hannover' | 'donna' | 'wts' | 'giz';
+	id: ReferenceId;
 	name: string;
 	href?: string;
+	/** What the project was actually built with, trimmed to what still says
+	 *  something — no version numbers, and no tooling for its own sake. */
+	stack: readonly string[];
 };
 
 export const references: readonly Reference[] = [
-	{ id: 'hannover', name: 'Hannover Re' },
-	{ id: 'donna', name: 'DonnaDesk', href: 'https://www.donnadesk.de' },
-	{ id: 'wts', name: 'WTS' },
-	{ id: 'giz', name: 'GIZ' },
+	{
+		id: 'donna',
+		name: 'DonnaDesk GmbH',
+		href: 'https://www.donnadesk.de',
+		stack: [
+			'TypeScript',
+			'Bun',
+			'Elysia',
+			'LiveKit',
+			'SvelteKit',
+			'Astro',
+			'Supabase',
+			'Pulumi',
+		],
+	},
+	{
+		id: 'hannover',
+		name: 'Hannover Rück SE',
+		stack: [
+			'C#',
+			'.NET',
+			'Angular',
+			'TypeScript',
+			'Nx',
+			'Micro Frontends',
+			'Microservices',
+			'EF Core',
+			'Oracle',
+			'Azure DevOps',
+		],
+	},
+	{
+		id: 'giz',
+		name: 'Gesellschaft für internationale Zusammenarbeit (GIZ)',
+		stack: [
+			'C#',
+			'.NET',
+			'Angular',
+			'TypeScript',
+			'Node.js',
+			'EF Core',
+			'MS SQL',
+			'Azure DevOps',
+		],
+	},
+	{
+		id: 'wts',
+		name: 'WTS Steuerberatungsgesellschaft mbH',
+		stack: [
+			'C#',
+			'.NET',
+			'Angular',
+			'TypeScript',
+			'Entity Framework',
+			'IdentityServer',
+			'MS SQL',
+		],
+	},
+	{
+		id: 'dzr',
+		name: 'Deutsches Zahnärztliches Rechenzentrum GmbH',
+		stack: ['C#', 'WPF', 'DevExpress'],
+	},
 ];

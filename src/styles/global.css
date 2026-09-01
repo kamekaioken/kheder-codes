@@ -20,7 +20,7 @@
 
 	--text-hero-1: clamp(52px, 13vw, 150px);
 	--text-hero-2: clamp(26px, 6.5vw, 74px);
-	--text-h2: clamp(28px, 5vw, 42px);
+	--text-heading: clamp(28px, 5vw, 42px);
 
 	--shadow-term:
 		0 24px 70px light-dark(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.55)),
@@ -127,7 +127,7 @@
 /* The dock's own measurements: the width of its column on a wide screen, and the
    shadow it casts on the page from whichever edge it sits. */
 :root {
-	--dock-w: clamp(360px, 30vw, 440px);
+	--dock-w: clamp(460px, 34vw, 560px);
 	--shadow-dock:
 		0 -16px 44px light-dark(rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.55)),
 		0 -2px 8px light-dark(rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.35));

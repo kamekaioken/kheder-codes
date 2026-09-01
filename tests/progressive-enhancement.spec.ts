@@ -14,10 +14,13 @@ test.describe('without JavaScript', () => {
 		await page.goto(routes.de.home);
 
 		await expect(page.getByTestId('wordmark')).toHaveText(/KHEDER\s*\.codes/);
-		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
+		await expect(page.locator('h1')).toHaveText(
+			'Servus, wir sind KHEDER.codes.',
+		);
 		await expect(page.getByTestId('hero')).toBeVisible();
 		await expect(page.getByTestId('terminal')).toBeVisible();
 		await expect(page.getByTestId('menu-home')).toBeVisible();
+		await expect(page.getByTestId('menu-team')).toBeVisible();
 		await expect(page.getByTestId('menu-settings')).toBeVisible();
 	});
 
@@ -32,17 +35,41 @@ test.describe('without JavaScript', () => {
 	test('content pages render their copy', async ({ page }) => {
 		await page.goto(routes.de.home);
 
-		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
-		await expect(page.locator('main')).toContainText('12 Jahren Erfahrung');
+		await expect(page.locator('h1')).toHaveText(
+			'Servus, wir sind KHEDER.codes.',
+		);
+		await expect(page.locator('main')).toContainText('Kheder, Alan und Andrej');
 		await expect(page.locator('footer')).toBeVisible();
 	});
 
-	test('the language switch works as a plain link', async ({ page }) => {
-		await page.goto(routes.de.settings);
+	// Settings has no page to fall back on, so the panel it lives in has to be in
+	// the served markup — otherwise nothing could unfold it and the language
+	// switch would be unreachable.
+	test('the settings panel is served open, and the language switch is a plain link', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.refs);
+
+		await expect(page.getByTestId('settings-submenu')).toBeVisible();
+		await expect(page.getByTestId('lang-en')).toHaveAttribute(
+			'href',
+			routes.en.refs,
+		);
 
 		await page.getByTestId('lang-en').click(clickOptions);
-		await expect(page).toHaveURL(new RegExp(`${routes.en.settings}/?$`));
-		await expect(page.locator('h1')).toHaveText('Settings');
+		await expect(page).toHaveURL(new RegExp(`${routes.en.refs}/?$`));
+		await expect(page.locator('h1')).toHaveText('References');
+	});
+
+	test('team profiles are reachable and readable', async ({ page }) => {
+		await page.goto(routes.de.team);
+
+		await page.getByTestId('member-2').click(clickOptions);
+		await expect(page).toHaveURL(new RegExp('/team/alan-kerkuki/?$'));
+		await expect(page.locator('h1')).toHaveText('Alan Kerkuki');
+
+		await page.getByTestId('doc-next').click(clickOptions);
+		await expect(page.locator('h1')).toHaveText('Andrej Ilnizkij');
 	});
 
 	test('blog entries link to their article', async ({ page }) => {

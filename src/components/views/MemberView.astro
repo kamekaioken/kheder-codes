@@ -1,0 +1,52 @@
+---
+import { type CollectionEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { neighboursOf } from '../../lib/docs';
+import type { Locale } from '../../lib/i18n';
+import {
+	getMembers,
+	getMemberTranslations,
+	type TeamMember,
+} from '../../lib/team';
+import { m } from '../../paraglide/messages.js';
+import DocNav from '../DocNav.astro';
+import Prose from '../Prose.astro';
+import Section from '../Section.astro';
+
+interface Props {
+	locale: Locale;
+	member: TeamMember;
+	entry: CollectionEntry<'team'>;
+}
+
+const { locale, member, entry } = Astro.props;
+const o = { locale };
+const { Content } = await render(entry);
+const alternates = await getMemberTranslations(member.translationKey);
+const { prev, next } = neighboursOf(await getMembers(locale), member.file);
+---
+
+<Base
+	{locale}
+	current="member"
+	currentDocFile={member.file}
+	title={`${member.title} — kheder.codes`}
+	description={entry.data.description}
+	{alternates}
+>
+	<Section
+		kicker={m.member_kicker({ file: member.file }, o)}
+		heading={member.title}
+		headingSpace="mb-2"
+	>
+		<p class="mb-9 text-[13px] text-dim" data-testid="member-role">{member.role}</p>
+
+		<Prose>
+			<Content />
+		</Prose>
+
+		<DocNav {locale} {prev} {next} />
+
+		<p class="mt-6 text-[13px] text-dim">{m.post_back({}, o)}</p>
+	</Section>
+</Base>

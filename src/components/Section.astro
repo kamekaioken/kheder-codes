@@ -1,4 +1,7 @@
 ---
+/** The page itself: the kicker, the one `<h1>` the document has, and the copy
+ *  underneath. The terminal alongside carries no headings of its own — the
+ *  outline belongs to whatever is being read. */
 interface Props {
 	kicker: string;
 	heading: string;
@@ -12,7 +15,7 @@ const { kicker, heading, headingSpace = 'mb-[18px]' } = Astro.props;
 	<div class="mb-2.5 text-[13px] text-dim">{kicker}</div>
 	<h1
 		class:list={[
-			'font-display m-0 text-h2 font-extrabold tracking-[-0.02em]',
+			'font-display m-0 text-heading font-extrabold tracking-[-0.02em]',
 			headingSpace,
 		]}
 	>

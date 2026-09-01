@@ -18,7 +18,7 @@ $effect(() => {
 });
 
 $effect(() => {
-	session.dock.syncRoute(session.current, session.submenu);
+	session.syncRoute();
 });
 </script>
 

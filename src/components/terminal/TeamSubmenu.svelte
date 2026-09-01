@@ -5,6 +5,7 @@ import TerminalMenu from '../ui/terminal/TerminalMenu.svelte';
 import TerminalOutput from '../ui/terminal/TerminalOutput.svelte';
 import TerminalPrompt from '../ui/terminal/TerminalPrompt.svelte';
 import TerminalRow from '../ui/terminal/TerminalRow.svelte';
+import TerminalRowHint from '../ui/terminal/TerminalRowHint.svelte';
 import { getSession } from './session.svelte';
 
 const session = getSession();
@@ -15,27 +16,30 @@ onMount(() => entrance.settle());
 
 <div
 	class={['mt-2.5', entrance.active && 'animate-fade-in']}
-	data-testid="legal-submenu"
+	data-testid="team-submenu"
 >
 	<TerminalPrompt
 		user="kheder"
 		host="mbp"
-		command={`${session.boot.commandText} ${session.labels.legalCmd}`}
+		command={`${session.boot.commandText} ${session.labels.teamCmd}`}
 	/>
 
-	<TerminalOutput class="mt-1.5 mb-0.5">{session.labels.legalCount}</TerminalOutput>
+	<TerminalOutput class="mt-1.5 mb-0.5">{session.labels.teamCount}</TerminalOutput>
 
-	<TerminalMenu label={session.labels.legalNavLabel} class="mt-1.5 mb-1">
-		{#each session.legalDocs as doc, index (doc.id)}
+	<TerminalMenu label={session.labels.teamNavLabel} class="mt-1.5 mb-1">
+		{#each session.members as member, index (member.file)}
 			<TerminalRow
-				href={doc.href}
-				aria-current={doc.file === session.currentDocFile ? 'page' : undefined}
-				data-testid={`legal-${doc.id}`}
+				href={member.href}
+				aria-current={member.file === session.currentDocFile
+					? 'page'
+					: undefined}
+				data-testid={`member-${index + 1}`}
 				class="text-fg"
-				selected={index === session.legalSelected}
-				onselect={() => session.openLegal(index)}
+				selected={index === session.memberSelected}
+				onselect={() => session.openMember(index)}
 			>
-				<span class="flex-none">{doc.file}</span>
+				<span class="min-w-[168px] flex-none">{member.file}</span>
+				<TerminalRowHint>{member.role}</TerminalRowHint>
 			</TerminalRow>
 		{/each}
 	</TerminalMenu>

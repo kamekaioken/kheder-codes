@@ -5,12 +5,14 @@ import KhederTerminal from '../components/terminal/KhederTerminal.svelte';
 import { getPosts } from '../lib/blog';
 import { htmlLang, type Locale, pathFor } from '../lib/i18n';
 import { getLegalDocs } from '../lib/legal';
+import { getMembers } from '../lib/team';
 import {
 	buildLabels,
 	buildLanguages,
 	buildMenu,
 	buildThemeOptions,
 	toTerminalLegalDocs,
+	toTerminalMembers,
 	toTerminalPosts,
 	type TerminalRoute,
 } from '../lib/terminal';
@@ -23,7 +25,7 @@ interface Props {
 	description: string;
 	current: TerminalRoute;
 	alternates: Partial<Record<Locale, string>>;
-	currentPostFile?: string | null;
+	currentDocFile?: string | null;
 }
 
 const {
@@ -32,14 +34,19 @@ const {
 	description,
 	current,
 	alternates,
-	currentPostFile = null,
+	currentDocFile = null,
 } = Astro.props;
 
 const showIntro = current === 'home';
 const items = buildMenu(locale);
+const members = await getMembers(locale);
 const posts = await getPosts(locale);
 const legalDocs = await getLegalDocs();
-const labels = buildLabels(locale, items);
+const labels = buildLabels(locale, items, {
+	members: members.length,
+	posts: posts.length,
+	legalDocs: legalDocs.length,
+});
 ---
 
 <html
@@ -61,15 +68,17 @@ const labels = buildLabels(locale, items);
 			client:load
 			transition:persist="terminal"
 			{items}
+			members={toTerminalMembers(members)}
 			posts={toTerminalPosts(posts)}
 			legalDocs={toTerminalLegalDocs(legalDocs)}
 			languages={buildLanguages(locale, alternates)}
 			themeOptions={buildThemeOptions(locale)}
 			{current}
-			{currentPostFile}
+			{currentDocFile}
 			{showIntro}
 			{labels}
 			homeHref={pathFor('home', locale)}
+			teamHref={pathFor('team', locale)}
 			blogHref={pathFor('blog', locale)}
 			legalHref={pathFor('legal', locale)}
 		/>

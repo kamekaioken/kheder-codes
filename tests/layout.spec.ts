@@ -245,6 +245,42 @@ test.describe('on a phone', () => {
 		await expect(page.getByTestId('post-1')).toBeInViewport();
 	});
 
+	// Picking a `.md` file is asking to read it, so the panel gets out of the way
+	// instead of leaving the document to a sliver of screen.
+	test('picking a markdown file folds the panel away', async ({ page }) => {
+		await page.goto(routes.de.team);
+		await waitForMenu(page);
+
+		await page.getByTestId('member-1').click();
+		await expect(page).toHaveURL(new RegExp(`${routes.de.member}/?$`));
+
+		await expect(page.getByTestId('member-1')).toBeHidden();
+		await expect
+			.poll(async () => (await dockBox(page)).height)
+			.toBeLessThan(80);
+		await expect(page.locator('h1')).toHaveText('Marlen Kheder');
+	});
+
+	test('every kind of document folds it, and its own index does not', async ({
+		page,
+	}) => {
+		for (const path of [routes.de.post, routes.de.privacy, routes.de.member]) {
+			await page.goto(path);
+			await expect(page.getByTestId('terminal'), path).toBeVisible();
+			await expect
+				.poll(async () => (await dockBox(page)).height, { message: path })
+				.toBeLessThan(80);
+		}
+
+		for (const path of [routes.de.team, routes.de.blog, routes.de.legal]) {
+			await page.goto(path);
+			await waitForMenu(page);
+			await expect
+				.poll(async () => (await dockBox(page)).height, { message: path })
+				.toBeGreaterThan(80);
+		}
+	});
+
 	test('tapping the bar opens it, and the next page folds it away again', async ({
 		page,
 	}) => {
@@ -277,7 +313,7 @@ test.describe('the home page', () => {
 		);
 
 		const heading = page.locator('h1');
-		await expect(heading).toHaveText('Servus, ich bin Kheder.');
+		await expect(heading).toHaveText('Servus, wir sind KHEDER.codes.');
 
 		const box = await dockBox(page);
 		expect((await heading.boundingBox())?.x ?? 0).toBeGreaterThanOrEqual(

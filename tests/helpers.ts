@@ -3,22 +3,24 @@ import { expect, type Page } from '@playwright/test';
 export const routes = {
 	de: {
 		home: '/',
+		team: '/team',
+		member: '/team/marlen-kheder',
 		blog: '/blog',
 		post: '/blog/voice-agents-mit-livekit',
 		refs: '/referenzen',
 		contact: '/kontakt',
-		settings: '/einstellungen',
 		legal: '/rechtliches',
 		imprint: '/impressum',
 		privacy: '/datenschutz',
 	},
 	en: {
 		home: '/en/',
+		team: '/en/team',
+		member: '/en/team/marlen-kheder',
 		blog: '/en/blog',
 		post: '/en/blog/voice-agents-with-livekit',
 		refs: '/en/references',
 		contact: '/en/contact',
-		settings: '/en/settings',
 	},
 } as const;
 
@@ -35,6 +37,13 @@ export async function openTerminalFromHero(page: Page) {
 	await page.keyboard.press('Enter');
 	await expect(page.locator('html')).toHaveAttribute('data-phase', 'term');
 	await waitForMenu(page);
+}
+
+/** Settings has no page of its own: the panel unfolds over whatever is open. */
+export async function openSettings(page: Page) {
+	await waitForMenu(page);
+	await page.getByTestId('menu-settings').click();
+	await expect(page.getByTestId('settings-submenu')).toBeVisible();
 }
 
 export function selectedRows(page: Page) {

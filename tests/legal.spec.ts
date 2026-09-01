@@ -9,8 +9,8 @@ test.describe('legal submenu', () => {
 		await waitForMenu(page);
 
 		const rows = page.locator('[data-testid^="menu-"]');
-		await expect(rows).toHaveCount(7);
-		await expect(rows.nth(6)).toHaveAttribute('data-testid', 'menu-legal');
+		await expect(rows).toHaveCount(8);
+		await expect(rows.nth(7)).toHaveAttribute('data-testid', 'menu-legal');
 
 		await expect(page.getByTestId('legal-submenu')).toBeVisible();
 		await expect(page.getByTestId('main-menu')).toHaveCSS('opacity', '0.4');
@@ -108,7 +108,7 @@ test.describe('legal submenu', () => {
 			routes.de.legal,
 		);
 		await expect(page.getByTestId('menu-legal')).toContainText(
-			'Impressum & Datenschutz — in German',
+			'Impressum & privacy — German',
 		);
 	});
 });

@@ -1,0 +1,48 @@
+---
+import type { DocNeighbours } from '../lib/docs';
+import type { Locale } from '../lib/i18n';
+import { m } from '../paraglide/messages.js';
+
+/** The document before and after this one, on the left and on the right. Either
+ *  side keeps its column when there is nothing to point at, so `next` stays on
+ *  the right at the top of a list. */
+interface Props extends DocNeighbours {
+	locale: Locale;
+}
+
+const { locale, prev, next } = Astro.props;
+const o = { locale };
+
+const link =
+	'block rounded-lg border border-dashed border-line px-4 py-3 text-[13px] no-underline hover:bg-row-hover hover:no-underline';
+---
+
+{
+	(prev || next) && (
+		<nav
+			class="mt-12 grid gap-3 border-t border-line pt-6 sm:grid-cols-2"
+			aria-label={m.doc_nav_label({}, o)}
+			data-testid="doc-nav"
+		>
+			{prev ? (
+				<a href={prev.href} rel="prev" class={link} data-testid="doc-prev">
+					<span class="block text-dim">← {m.doc_prev({}, o)}</span>
+					<span class="block">{prev.file}</span>
+				</a>
+			) : (
+				<span />
+			)}
+			{next && (
+				<a
+					href={next.href}
+					rel="next"
+					class:list={[link, 'sm:text-right']}
+					data-testid="doc-next"
+				>
+					<span class="block text-dim">{m.doc_next({}, o)} →</span>
+					<span class="block">{next.file}</span>
+				</a>
+			)}
+		</nav>
+	)
+}

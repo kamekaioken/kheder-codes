@@ -19,11 +19,15 @@ const DEFAULT_SPEED = 70;
  * settings submenu in `settings` and the docked panel in `dock`.
  */
 export class TerminalSession {
-	readonly boot: BootSequence;
-	readonly settings: SettingsPanel;
-	readonly dock = new TerminalDock();
-
 	#props: () => TerminalProps;
+
+	readonly boot: BootSequence;
+	readonly dock = new TerminalDock();
+	readonly settings = new SettingsPanel({
+		languages: () => this.#props().languages,
+		themeOptions: () => this.#props().themeOptions,
+		navigate: (href) => this.go(href),
+	});
 
 	constructor(props: () => TerminalProps) {
 		this.#props = props;
@@ -33,16 +37,14 @@ export class TerminalSession {
 			speed: props().typingSpeed ?? DEFAULT_SPEED,
 			rowCount: () => this.items.length,
 		});
-
-		this.settings = new SettingsPanel({
-			languages: () => this.#props().languages,
-			themeOptions: () => this.#props().themeOptions,
-			open: (href) => this.go(href),
-		});
 	}
 
 	get items() {
 		return this.#props().items;
+	}
+
+	get members() {
+		return this.#props().members;
 	}
 
 	get posts() {
@@ -61,8 +63,9 @@ export class TerminalSession {
 		return this.#props().current;
 	}
 
-	get currentPostFile() {
-		return this.#props().currentPostFile ?? null;
+	/** The `.md` file the page is showing, for the submenu row that opened it. */
+	get currentDocFile() {
+		return this.#props().currentDocFile ?? null;
 	}
 
 	get showIntro() {
@@ -73,6 +76,10 @@ export class TerminalSession {
 		return this.#props().homeHref;
 	}
 
+	get teamHref() {
+		return this.#props().teamHref;
+	}
+
 	get blogHref() {
 		return this.#props().blogHref;
 	}
@@ -81,7 +88,11 @@ export class TerminalSession {
 		return this.#props().legalHref;
 	}
 
-	readonly submenu = $derived(submenuOf[this.current]);
+	/** Settings owns no route: while its panel is unfolded it takes the screen
+	 *  over whatever page is being read, and closing it hands the screen back. */
+	readonly submenu = $derived(
+		this.settings.expanded ? 'settings' : submenuOf[this.current],
+	);
 
 	/** A leaf route highlights the main-menu row of the submenu it sits in. */
 	readonly activeItemId = $derived(this.submenu ?? this.current);
@@ -97,27 +108,36 @@ export class TerminalSession {
 		),
 	);
 
+	readonly #memberIndex = $derived(
+		Math.max(
+			0,
+			this.members.findIndex((member) => member.file === this.currentDocFile),
+		),
+	);
+
 	readonly #postIndex = $derived(
 		Math.max(
 			0,
-			this.posts.findIndex((post) => post.file === this.currentPostFile),
+			this.posts.findIndex((post) => post.file === this.currentDocFile),
 		),
 	);
 
 	readonly #legalIndex = $derived(
 		Math.max(
 			0,
-			this.legalDocs.findIndex((doc) => doc.id === this.current),
+			this.legalDocs.findIndex((doc) => doc.file === this.currentDocFile),
 		),
 	);
 
 	/** Cursors follow the route by default and stay put once moved by hand. */
 	selected = $derived(this.#itemIndex);
+	memberSelected = $derived(this.#memberIndex);
 	postSelected = $derived(this.#postIndex);
 	legalSelected = $derived(this.#legalIndex);
 
 	/** Leaf routes step back into their submenu, everything else to the main menu. */
 	readonly #parentHref: Partial<Record<TerminalRoute, string>> = $derived({
+		member: this.teamHref,
 		post: this.blogHref,
 		imprint: this.legalHref,
 		privacy: this.legalHref,
@@ -148,11 +168,19 @@ export class TerminalSession {
 		};
 	}
 
+	/** Leaving a page folds the settings panel and re-applies the dock's own rule.
+	 *  Switching language stays on the same route, so the panel survives it. */
+	syncRoute(): void {
+		this.settings.syncRoute(this.current);
+		this.dock.syncRoute(this.current);
+	}
+
 	handleKey(event: KeyboardEvent): void {
 		handleTerminalKey(this, event);
 	}
 
 	resetToHero(): void {
+		this.settings.collapse();
 		this.boot.replay();
 		window.scrollTo({ top: 0 });
 		if (this.current !== 'home') navigate(this.homeHref);
@@ -164,6 +192,10 @@ export class TerminalSession {
 	}
 
 	goBack(): void {
+		if (this.settings.expanded) {
+			this.settings.collapse();
+			return;
+		}
 		const parent = this.#parentHref[this.current];
 		if (parent) this.go(parent);
 		else if (this.current !== 'home') this.go(this.homeHref);
@@ -175,10 +207,24 @@ export class TerminalSession {
 		if (!item) return;
 		this.selected = index;
 		if (item.external) {
-			window.open(item.href, '_blank', 'noopener');
+			window.open(item.href ?? '', '_blank', 'noopener');
 			return;
 		}
+		/* A row without an href goes nowhere — it only unfolds its own panel. */
+		if (item.href === null) {
+			this.settings.expand();
+			this.dock.expand();
+			return;
+		}
+		this.settings.collapse();
 		this.go(item.href);
+	}
+
+	openMember(index: number): void {
+		const member = this.members[index];
+		if (!member) return;
+		this.memberSelected = index;
+		this.go(member.href);
 	}
 
 	openPost(index: number): void {

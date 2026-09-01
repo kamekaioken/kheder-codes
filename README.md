@@ -1,8 +1,8 @@
 # kheder.codes
 
-Terminal-style portfolio for Kheder — freelance software developer, Nuremberg.
-Built with Astro, one Svelte island for the terminal, Tailwind 4 for the design tokens,
-and Paraglide JS for German/English.
+Terminal-style site for KHEDER.codes — Kheder, Alan and Andrej, three software developers
+from Nuremberg. Built with Astro, one Svelte island for the terminal, Tailwind 4 for the
+design tokens, and Paraglide JS for German/English.
 
 ## Commands
 
@@ -19,17 +19,18 @@ and Paraglide JS for German/English.
 
 German is served unprefixed, English under `/en` with translated slugs.
 
-| Page      | German            | English         |
-| :-------- | :---------------- | :-------------- |
-| Home      | `/`               | `/en/`          |
-| About     | `/ueber-mich`     | `/en/about`     |
-| Blog      | `/blog`           | `/en/blog`      |
-| Article   | `/blog/[slug]`    | `/en/blog/[slug]` |
-| Reference | `/referenzen`     | `/en/references` |
-| Contact   | `/kontakt`        | `/en/contact`   |
-| Settings  | `/einstellungen`  | `/en/settings`  |
+| Page      | German            | English            |
+| :-------- | :---------------- | :----------------- |
+| Home      | `/`               | `/en/`             |
+| Team      | `/team`           | `/en/team`         |
+| Profile   | `/team/[slug]`    | `/en/team/[slug]`  |
+| Blog      | `/blog`           | `/en/blog`         |
+| Article   | `/blog/[slug]`    | `/en/blog/[slug]`  |
+| Reference | `/referenzen`     | `/en/references`   |
+| Contact   | `/kontakt`        | `/en/contact`      |
+| Legal     | `/rechtliches`    | German only        |
 
-`donnadesk ↗` is an external link, not a route.
+`donnadesk ↗` is an external link, and settings is a terminal panel — neither is a route.
 
 ## How it fits together
 
@@ -70,20 +71,28 @@ override is `color-scheme: only light|dark` driven by `data-theme` on `<html>`, 
 first paint from `localStorage` and re-applied on `astro:after-swap`. `system` removes the
 attribute and follows the OS.
 
-**Settings** (`/einstellungen`) is an inline terminal submenu in the same pattern as `blog/`:
+**Settings has no page.** Its menu row is a button rather than a link, and it unfolds a
+panel over whatever you were reading — the URL does not move, and `⎋` folds it away again.
 `↑↓` picks a row, `←→` moves the value cursor, `⏎` applies. Language values are real anchors
-(they work without JS and carry `hreflang`); theme values are buttons. Three separate
-signals keep it readable: `❯` marks the focused row, `(•)`/`( )` marks the saved value, and
-the accent frame marks where the cursor sits.
+(they work without JS, carry `hreflang` and land on the counterpart of the page you are on);
+theme values are buttons. Three separate signals keep it readable: `❯` marks the focused row,
+`(•)`/`( )` marks the saved value, and the accent frame marks where the cursor sits. Because
+nothing could unfold the panel without JS, it is always in the served markup and merely
+hidden by CSS.
 
-**Headings.** Every page has exactly one `<h1>` and it is the heading a reader actually
-sees: the wordmark on `/` (what a crawler renders, since `/` starts in the hero phase) and
-the design's section heading everywhere else, styled as before but no longer wrapped in a
-second, hidden heading.
+**Headings belong to the page, not to the terminal.** Every page has exactly one `<h1>`,
+rendered by `Section.astro` inside `<main>`; a markdown body starts its own outline at
+`<h2>` beneath it. The terminal beside it carries the menu and no heading element at all —
+the wordmark is a `<p>`.
+
+**Every markdown page points at its neighbours.** Team profiles, articles and legal
+documents each link the document before and after them in their own collection
+(`DocNav.astro`), in the same order the terminal submenu lists them.
 
 Key modules:
 
 - `src/lib/i18n.ts` — the localised route table; single source for menu hrefs, `hreflang` and sitemap alternates
 - `src/lib/terminal.ts` — builds the menu, labels and settings options for a locale, and owns the island's prop types
 - `src/lib/theme.ts` / `src/lib/intro.ts` — storage keys and helpers shared by the island and the inline pre-paint script
-- `src/content.config.ts` — blog collection; entries live in `src/content/blog/<locale>/` and pair up through `translationKey`
+- `src/lib/docs.ts` — the previous/next neighbours of a markdown page within its collection
+- `src/content.config.ts` — the `blog`, `team` and `legal` collections; blog and team entries live under `src/content/<collection>/<locale>/` and pair up through `translationKey`

@@ -13,10 +13,11 @@ const { locale } = Astro.props;
 const o = { locale };
 
 const descriptions = {
-	hannover: m.refs_hannover({}, o),
 	donna: m.refs_donna({}, o),
-	wts: m.refs_wts({}, o),
+	hannover: m.refs_hannover({}, o),
 	giz: m.refs_giz({}, o),
+	wts: m.refs_wts({}, o),
+	dzr: m.refs_dzr({}, o),
 };
 ---
 
@@ -29,19 +30,21 @@ const descriptions = {
 >
 	<Section
 		kicker={m.refs_kicker({}, o)}
-		heading={m.refs_h2({}, o)}
+		heading={m.refs_heading({}, o)}
 		headingSpace="mb-2"
 	>
+		<p class="m-0 text-[15px] leading-[1.8] text-dim">{m.refs_intro({}, o)}</p>
+
 		<ul class="m-0 flex list-none flex-col p-0">
 			{
 				references.map((reference, index) => (
 					<li
 						class:list={[
-							'flex flex-wrap items-baseline gap-x-6 gap-y-1.5 py-[22px]',
+							'flex flex-col gap-2.5 py-[22px]',
 							index < references.length - 1 && 'border-b border-dashed border-line',
 						]}
 					>
-						<span class="min-w-[140px] text-base font-bold">
+						<span class="text-base font-bold">
 							{reference.name}
 							{reference.href && (
 								<Fragment>
@@ -57,9 +60,19 @@ const descriptions = {
 								</Fragment>
 							)}
 						</span>
-						<span class="min-w-[240px] flex-1 text-sm leading-[1.7] text-dim">
+						<span class="text-sm leading-[1.7] text-dim">
 							{descriptions[reference.id]}
 						</span>
+						<ul
+							class="m-0 flex list-none flex-wrap gap-2 p-0"
+							aria-label={`${m.refs_stack_label({}, o)}: ${reference.name}`}
+						>
+							{reference.stack.map((item) => (
+								<li class="rounded-md border border-line px-2.5 py-1 text-[13px] text-dim">
+									{item}
+								</li>
+							))}
+						</ul>
 					</li>
 				))
 			}

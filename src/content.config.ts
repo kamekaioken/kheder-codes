@@ -12,6 +12,17 @@ const blog = defineCollection({
 	}),
 });
 
+const team = defineCollection({
+	loader: glob({ pattern: '**/*.md', base: './src/content/team' }),
+	schema: z.object({
+		name: z.string(),
+		role: z.string(),
+		order: z.number(),
+		translationKey: z.string(),
+		description: z.string(),
+	}),
+});
+
 const legal = defineCollection({
 	loader: glob({ pattern: '*.md', base: './src/content/legal' }),
 	schema: z.object({
@@ -24,4 +35,4 @@ const legal = defineCollection({
 	}),
 });
 
-export const collections = { blog, legal };
+export const collections = { blog, team, legal };

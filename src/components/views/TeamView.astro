@@ -1,0 +1,44 @@
+---
+import Base from '../../layouts/Base.astro';
+import { alternatesFor, type Locale } from '../../lib/i18n';
+import { getMembers } from '../../lib/team';
+import { m } from '../../paraglide/messages.js';
+import Section from '../Section.astro';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const o = { locale };
+const members = await getMembers(locale);
+---
+
+<Base
+	{locale}
+	current="team"
+	title={m.team_title({}, o)}
+	description={m.team_description({}, o)}
+	alternates={alternatesFor('team')}
+>
+	<Section
+		kicker={m.team_kicker({}, o)}
+		heading={m.team_heading({}, o)}
+		headingSpace="mb-6"
+	>
+		<p class="m-0 mb-6 text-[15px] leading-[1.8] text-dim">{m.team_intro({}, o)}</p>
+		<ul class="m-0 flex list-none flex-col gap-2.5 p-0">
+			{
+				members.map((member) => (
+					<li class="flex flex-wrap items-baseline gap-x-3.5 gap-y-1 rounded-lg border border-dashed border-line px-4 py-3.5 text-dim">
+						<a href={member.href} class="text-[13px]">
+							{member.file}
+						</a>
+						<span class="text-sm font-bold text-fg">{member.title}</span>
+						<span class="ml-auto text-[13px]">{member.role}</span>
+					</li>
+				))
+			}
+		</ul>
+	</Section>
+</Base>

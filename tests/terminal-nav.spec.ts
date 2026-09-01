@@ -7,17 +7,18 @@ import {
 } from './helpers';
 
 const menuCopy = [
-	['menu-home', '~', 'Wer ich bin & womit ich arbeite'],
+	['menu-home', '~', 'Wer wir sind'],
+	['menu-team', 'team/', 'Kheder, Alan & Andrej'],
 	['menu-blog', 'blog/', 'Notizen & Artikel'],
 	['menu-refs', 'referenzen', 'Projekte & Kunden'],
 	['menu-contact', 'kontakt', 'Sag hallo'],
-	['menu-donna', 'donnadesk ↗', 'Mein Startup — öffnet donnadesk.de'],
+	['menu-donna', 'donnadesk ↗', 'Unser Produkt für Voice AI'],
 	['menu-settings', 'einstellungen/', 'Sprache & Theme'],
 	['menu-legal', 'rechtliches/', 'Impressum & Datenschutz'],
 ] as const;
 
 test.describe('terminal as navigation', () => {
-	test('shows the seven menu options in order with the exact copy', async ({
+	test('shows the eight menu options in order with the exact copy', async ({
 		page,
 	}) => {
 		await page.goto(routes.de.refs);
@@ -34,8 +35,42 @@ test.describe('terminal as navigation', () => {
 		}
 
 		await expect(page.getByTestId('hint-line')).toHaveText(
-			'↑↓ wählen · ⏎ öffnen · [1–7] direkt · ⎋ zurück · oder klicken',
+			'↑↓ wählen · ⏎ öffnen · [1–8] direkt · ⎋ zurück · oder klicken',
 		);
+	});
+
+	// The version banner is gone: the page's own heading says who this is, and the
+	// terminal carries no headline of its own.
+	test('the menu opens straight on the prompt, with no banner above it', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.refs);
+		await waitForMenu(page);
+
+		await expect(page.getByTestId('main-menu')).toContainText(
+			'wähle eine option:',
+		);
+		await expect(page.getByTestId('main-menu')).not.toContainText('v12.0');
+		await expect(
+			page.getByTestId('terminal').locator('h1, h2, h3'),
+		).toHaveCount(0);
+	});
+
+	// Every option is one line at every width the terminal takes a column of its
+	// own, which is what its width is picked for.
+	test('every option fits on a single line beside the page', async ({
+		page,
+	}) => {
+		for (const width of [1080, 1440, 1920]) {
+			await page.setViewportSize({ width, height: 900 });
+			await page.goto(routes.de.refs);
+			await waitForMenu(page);
+
+			for (const [testId] of menuCopy) {
+				const box = await page.getByTestId(testId).boundingBox();
+				expect(box?.height ?? 0, `${testId} at ${width}px`).toBeLessThan(40);
+			}
+		}
 	});
 
 	test('marks the current page as selected', async ({ page }) => {
@@ -60,6 +95,7 @@ test.describe('terminal as navigation', () => {
 
 		await page.keyboard.press('ArrowDown');
 		await page.keyboard.press('ArrowDown');
+		await page.keyboard.press('ArrowDown');
 		await expect(page.getByTestId('menu-refs')).toHaveClass(/row-selected/);
 
 		await page.keyboard.press('Enter');
@@ -79,7 +115,7 @@ test.describe('terminal as navigation', () => {
 		await page.goto('/');
 		await openTerminalFromHero(page);
 
-		await page.keyboard.press('4');
+		await page.keyboard.press('5');
 		await expect(page).toHaveURL(new RegExp(`${routes.de.contact}/?$`));
 		await expect(page.locator('h1')).toHaveText('Sag hallo.');
 	});
@@ -114,6 +150,82 @@ test.describe('terminal as navigation', () => {
 
 		await expect(page.getByTestId('terminal')).toBeVisible();
 		await expect(page.getByTestId('menu-settings')).toHaveCSS('opacity', '1');
+	});
+});
+
+test.describe('team submenu', () => {
+	test('sits second in the menu and opens inside the terminal', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.team);
+		await waitForMenu(page);
+
+		const rows = page.locator('[data-testid^="menu-"]');
+		await expect(rows.nth(1)).toHaveAttribute('data-testid', 'menu-team');
+
+		await expect(page.getByTestId('team-submenu')).toBeVisible();
+		await expect(page.getByTestId('main-menu')).toHaveCSS('opacity', '0.4');
+		await expect(page.getByTestId('term-title')).toHaveText(
+			'kheder — ~/team — 80×24',
+		);
+		await expect(page.getByTestId('team-submenu')).toContainText('kheder team');
+		await expect(page.getByTestId('team-submenu')).toContainText('3 Profile:');
+		await expect(page.getByTestId('hint-line')).toHaveText(
+			'↑↓ wählen · ⏎ öffnen · [1–3] direkt · ⎋ zurück',
+		);
+	});
+
+	test('lists the three of us as markdown files', async ({ page }) => {
+		await page.goto(routes.de.team);
+		await waitForMenu(page);
+
+		const members = [
+			['marlen-kheder.md', 'Full-Stack & Voice AI'],
+			['alan-kerkuki.md', 'Entwickler & Mitgründer'],
+			['andrej-ilnizkij.md', 'Entwickler & Mitgründer'],
+		];
+
+		for (const [index, [file, role]] of members.entries()) {
+			const row = page.getByTestId(`member-${index + 1}`);
+			await expect(row).toContainText(file);
+			await expect(row).toContainText(role);
+		}
+	});
+
+	test('arrow keys and ENTER open a profile', async ({ page }) => {
+		await page.goto(routes.de.team);
+		await waitForMenu(page);
+
+		await page.keyboard.press('ArrowDown');
+		await page.keyboard.press('Enter');
+
+		await expect(page).toHaveURL(new RegExp('/team/alan-kerkuki/?$'));
+		await expect(page.locator('h1')).toHaveText('Alan Kerkuki');
+	});
+
+	test('number keys open a profile directly', async ({ page }) => {
+		await page.goto(routes.de.team);
+		await waitForMenu(page);
+
+		await page.keyboard.press('3');
+		await expect(page).toHaveURL(new RegExp('/team/andrej-ilnizkij/?$'));
+	});
+
+	test('a profile marks its own row and the team row of the main menu', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.member);
+		await waitForMenu(page);
+
+		await expect(page.getByTestId('menu-team')).toHaveAttribute(
+			'aria-current',
+			'page',
+		);
+		await expect(page.getByTestId('member-1')).toHaveAttribute(
+			'aria-current',
+			'page',
+		);
+		await expect(page.getByTestId('member-1')).toHaveClass(/row-selected/);
 	});
 });
 
@@ -192,6 +304,18 @@ test.describe('ESC goes back hierarchically', () => {
 		await page.keyboard.press('Escape');
 		await expect(page.locator('html')).toHaveAttribute('data-phase', 'hero');
 		await expect(page.getByTestId('hero')).toBeVisible();
+	});
+
+	test('profile → team list → main menu', async ({ page }) => {
+		await page.goto(routes.de.member);
+		await waitForMenu(page);
+
+		await page.keyboard.press('Escape');
+		await expect(page).toHaveURL(new RegExp(`${routes.de.team}/?$`));
+
+		await page.keyboard.press('Escape');
+		await expect(page).toHaveURL(new RegExp('/$'));
+		await expect(page.getByTestId('main-menu')).toHaveCSS('opacity', '1');
 	});
 
 	test('a content page goes straight back to the main menu', async ({

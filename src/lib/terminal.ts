@@ -3,20 +3,26 @@ import type { BlogEntry } from './blog';
 import { type Locale, locales, pathFor } from './i18n';
 import type { LegalDoc } from './legal';
 import { site } from './site';
+import type { TeamMember } from './team';
 import { type Theme, themes } from './theme';
 
 export type TerminalItem = {
 	id: string;
 	name: string;
 	desc: string;
-	href: string;
+	/** `null` for a row that only unfolds its submenu instead of going anywhere. */
+	href: string | null;
 	external: boolean;
 	submenu: TerminalSubmenu;
 };
 
-export type TerminalPost = { file: string; title: string; href: string };
+export type TerminalDoc = { file: string; title: string; href: string };
 
-export type TerminalLegalDoc = { id: string; file: string; href: string };
+export type TerminalPost = TerminalDoc;
+
+export type TerminalMember = TerminalDoc & { role: string };
+
+export type TerminalLegalDoc = TerminalDoc & { id: string };
 
 export type LanguageOption = {
 	locale: Locale;
@@ -29,44 +35,58 @@ export type ThemeOption = { value: Theme; name: string };
 
 export type TerminalRoute =
 	| 'home'
+	| 'team'
+	| 'member'
 	| 'blog'
+	| 'post'
 	| 'refs'
 	| 'contact'
-	| 'settings'
-	| 'post'
 	| 'legal'
 	| 'imprint'
 	| 'privacy';
 
-export type TerminalSubmenu = 'blog' | 'settings' | 'legal' | null;
+export type TerminalSubmenu = 'team' | 'blog' | 'settings' | 'legal' | null;
 
 /** Which submenu a route opens. Leaf routes name the submenu they belong to,
- *  which is also how the main menu knows which row to mark as current. */
+ *  which is also how the main menu knows which row to mark as current. Settings
+ *  has no route of its own: it unfolds over whatever page you are reading. */
 export const submenuOf: Record<TerminalRoute, TerminalSubmenu> = {
 	home: null,
 	refs: null,
 	contact: null,
+	team: 'team',
+	member: 'team',
 	blog: 'blog',
 	post: 'blog',
-	settings: 'settings',
 	legal: 'legal',
 	imprint: 'legal',
 	privacy: 'legal',
 };
 
+/** Where a phone keeps the panel unfolded: the home screen and the index of a
+ *  submenu, because there the menu is still the point. A document has nothing
+ *  left to choose, so the terminal folds itself out of the way. */
+const menuRoutes = new Set<TerminalRoute>(['home', 'team', 'blog', 'legal']);
+
+export function menuIsThePoint(route: TerminalRoute): boolean {
+	return menuRoutes.has(route);
+}
+
 export type TerminalLabels = ReturnType<typeof buildLabels>;
 
 export type TerminalProps = {
 	items: TerminalItem[];
+	members: TerminalMember[];
 	posts: TerminalPost[];
 	legalDocs: TerminalLegalDoc[];
 	languages: LanguageOption[];
 	themeOptions: ThemeOption[];
 	labels: TerminalLabels;
 	current: TerminalRoute;
-	currentPostFile?: string | null;
+	currentDocFile?: string | null;
 	showIntro?: boolean;
 	homeHref: string;
+	teamHref: string;
 	blogHref: string;
 	legalHref: string;
 	typingSpeed?: number;
@@ -83,6 +103,14 @@ export function buildMenu(locale: Locale): TerminalItem[] {
 			href: pathFor('home', locale),
 			external: false,
 			submenu: null,
+		},
+		{
+			id: 'team',
+			name: m.menu_team({}, o),
+			desc: m.menu_team_desc({}, o),
+			href: pathFor('team', locale),
+			external: false,
+			submenu: 'team',
 		},
 		{
 			id: 'blog',
@@ -120,7 +148,7 @@ export function buildMenu(locale: Locale): TerminalItem[] {
 			id: 'settings',
 			name: m.menu_settings({}, o),
 			desc: m.menu_settings_desc({}, o),
-			href: pathFor('settings', locale),
+			href: null,
 			external: false,
 			submenu: 'settings',
 		},
@@ -135,14 +163,21 @@ export function buildMenu(locale: Locale): TerminalItem[] {
 	];
 }
 
-/** `blog/`, `einstellungen/` and `rechtliches/` double as the commands echoed in
- *  the submenu prompt. */
+/** `team/`, `blog/`, `einstellungen/` and `rechtliches/` double as the commands
+ *  echoed in the submenu prompt. */
 function commandOf(items: TerminalItem[], id: string): string {
 	return items.find((item) => item.id === id)?.name.replace(/\/$/, '') ?? id;
 }
 
-export function buildLabels(locale: Locale, items: TerminalItem[]) {
+type Counts = { members: number; posts: number; legalDocs: number };
+
+export function buildLabels(
+	locale: Locale,
+	items: TerminalItem[],
+	counts: Counts,
+) {
 	const o = { locale };
+	const teamCmd = commandOf(items, 'team');
 	const blogCmd = commandOf(items, 'blog');
 	const settingsCmd = commandOf(items, 'settings');
 	/* The legal documents live under one German path in both locales, so the
@@ -159,19 +194,25 @@ export function buildLabels(locale: Locale, items: TerminalItem[]) {
 		/* Keyed by submenu, so the screen reads them as `titles[submenu ?? 'main']`. */
 		titles: {
 			main: m.term_title({ cwd: '~' }, o),
+			team: m.term_title({ cwd: `~/${teamCmd}` }, o),
 			blog: m.term_title({ cwd: `~/${blogCmd}` }, o),
 			settings: m.term_title({ cwd: `~/${settingsCmd}` }, o),
 			legal: m.term_title({ cwd: `~/${legalCmd}` }, o),
 		},
+		/* Every list names how far its number keys reach, so a new entry does not
+		   leave the hint line lying. */
 		hints: {
-			main: m.hint_main({}, o),
-			blog: m.hint_blog({}, o),
+			main: m.hint_main({ count: items.length }, o),
+			team: m.hint_team({ count: counts.members }, o),
+			blog: m.hint_blog({ count: counts.posts }, o),
 			settings: m.hint_settings({}, o),
-			legal: m.hint_legal({}, o),
+			legal: m.hint_legal({ count: counts.legalDocs }, o),
 		},
-		version: m.term_version({}, o),
 		choose: m.term_choose({}, o),
 		navLabel: m.term_nav_label({}, o),
+		teamCmd,
+		teamCount: m.team_submenu_count({}, o),
+		teamNavLabel: m.team_submenu_label({}, o),
 		blogCmd,
 		blogCount: m.blog_submenu_count({}, o),
 		blogNavLabel: m.blog_submenu_label({}, o),
@@ -187,18 +228,19 @@ export function buildLabels(locale: Locale, items: TerminalItem[]) {
 	};
 }
 
+/** Both languages are always on offer. A page with no counterpart — the German
+ *  legal documents — hands the other locale its home page rather than hiding the
+ *  switch, which is the one row you may have come to the settings for. */
 export function buildLanguages(
 	locale: Locale,
 	alternates: Partial<Record<Locale, string>>,
 ): LanguageOption[] {
-	return locales
-		.filter((candidate) => alternates[candidate] !== undefined)
-		.map((candidate) => ({
-			locale: candidate,
-			name: m.locale_name({}, { locale: candidate }),
-			href: alternates[candidate] as string,
-			active: candidate === locale,
-		}));
+	return locales.map((candidate) => ({
+		locale: candidate,
+		name: m.locale_name({}, { locale: candidate }),
+		href: alternates[candidate] ?? pathFor('home', candidate),
+		active: candidate === locale,
+	}));
 }
 
 export function buildThemeOptions(locale: Locale): ThemeOption[] {
@@ -211,10 +253,19 @@ export function buildThemeOptions(locale: Locale): ThemeOption[] {
 	return themes.map((value) => ({ value, name: names[value] }));
 }
 
+export function toTerminalMembers(members: TeamMember[]): TerminalMember[] {
+	return members.map(({ file, title, href, role }) => ({
+		file,
+		title,
+		href,
+		role,
+	}));
+}
+
 export function toTerminalPosts(posts: BlogEntry[]): TerminalPost[] {
 	return posts.map(({ file, title, href }) => ({ file, title, href }));
 }
 
 export function toTerminalLegalDocs(docs: LegalDoc[]): TerminalLegalDoc[] {
-	return docs.map(({ id, file, href }) => ({ id, file, href }));
+	return docs.map(({ id, file, title, href }) => ({ id, file, title, href }));
 }

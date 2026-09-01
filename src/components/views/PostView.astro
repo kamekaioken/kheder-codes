@@ -1,9 +1,11 @@
 ---
 import Base from '../../layouts/Base.astro';
 import type { BlogEntry } from '../../lib/blog';
-import { getPostTranslations } from '../../lib/blog';
+import { getPosts, getPostTranslations } from '../../lib/blog';
+import { neighboursOf } from '../../lib/docs';
 import type { Locale } from '../../lib/i18n';
 import { m } from '../../paraglide/messages.js';
+import DocNav from '../DocNav.astro';
 import Section from '../Section.astro';
 
 interface Props {
@@ -14,12 +16,13 @@ interface Props {
 const { locale, post } = Astro.props;
 const o = { locale };
 const alternates = await getPostTranslations(post.translationKey);
+const { prev, next } = neighboursOf(await getPosts(locale), post.file);
 ---
 
 <Base
 	{locale}
 	current="post"
-	currentPostFile={post.file}
+	currentDocFile={post.file}
 	title={`${post.title} — kheder.codes`}
 	description={m.post_body({}, o)}
 	{alternates}
@@ -29,6 +32,9 @@ const alternates = await getPostTranslations(post.translationKey);
 		heading={post.title}
 	>
 		<p class="m-0 text-[15px] leading-[1.8] text-dim">{m.post_body({}, o)}</p>
-		<p class="mt-[18px] text-[13px] text-dim">{m.post_back({}, o)}</p>
+
+		<DocNav {locale} {prev} {next} />
+
+		<p class="mt-6 text-[13px] text-dim">{m.post_back({}, o)}</p>
 	</Section>
 </Base>

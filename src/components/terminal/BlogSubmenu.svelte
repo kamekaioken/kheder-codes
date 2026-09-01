@@ -30,7 +30,7 @@ onMount(() => entrance.settle());
 		{#each session.posts as post, index (post.file)}
 			<TerminalRow
 				href={post.href}
-				aria-current={post.file === session.currentPostFile
+				aria-current={post.file === session.currentDocFile
 					? 'page'
 					: undefined}
 				data-testid={`post-${index + 1}`}

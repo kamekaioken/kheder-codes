@@ -12,6 +12,12 @@ const session = getSession();
 const entrance = new Entrance(300);
 
 onMount(() => entrance.settle());
+
+/* This panel stays mounted so that it is in the served markup, so its entry
+   animation belongs to the moment it unfolds rather than to its mount. */
+$effect(() => {
+	if (session.settings.expanded) entrance.replay();
+});
 </script>
 
 <div

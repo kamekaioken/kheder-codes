@@ -9,8 +9,9 @@ import TerminalWindow from '../ui/terminal/TerminalWindow.svelte';
 import BlogSubmenu from './BlogSubmenu.svelte';
 import LegalSubmenu from './LegalSubmenu.svelte';
 import MainMenu from './MainMenu.svelte';
-import SettingsSubmenu from './SettingsSubmenu.svelte';
 import { getSession } from './session.svelte';
+import SettingsSubmenu from './SettingsSubmenu.svelte';
+import TeamSubmenu from './TeamSubmenu.svelte';
 
 const session = getSession();
 const dock = session.dock;
@@ -123,17 +124,24 @@ function onBarClick(event: MouseEvent) {
 							<div data-menu data-typed={session.boot.menuOn}>
 								<MainMenu />
 
-								{#if session.submenu === 'blog'}
-									<BlogSubmenu />
+								{#if session.submenu === 'team'}
+									<TeamSubmenu />
 								{/if}
 
-								{#if session.submenu === 'settings'}
-									<SettingsSubmenu />
+								{#if session.submenu === 'blog'}
+									<BlogSubmenu />
 								{/if}
 
 								{#if session.submenu === 'legal'}
 									<LegalSubmenu />
 								{/if}
+
+								<!-- Settings has no page behind it, so it is the one panel that
+								     has to be in the served markup: without JavaScript nothing
+								     could unfold it, and the language links would be gone. -->
+								<div data-typed={session.submenu === 'settings'}>
+									<SettingsSubmenu />
+								</div>
 							</div>
 						</TerminalBody>
 					</div>

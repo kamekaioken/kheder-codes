@@ -28,9 +28,6 @@ test.describe('hero intro', () => {
 			'kheder — ~ — 80×24',
 		);
 		await expect(page.getByTestId('main-menu')).toContainText(
-			'kheder v12.0 — freiberuflicher softwareentwickler',
-		);
-		await expect(page.getByTestId('main-menu')).toContainText(
 			'wähle eine option:',
 		);
 	});
@@ -99,7 +96,7 @@ test.describe('hero intro', () => {
 
 		const shell = page.locator('[data-shell]');
 		await expect(shell).toHaveAttribute('inert', '');
-		await expect(shell).toContainText('Servus, ich bin Kheder.');
+		await expect(shell).toContainText('Servus, wir sind KHEDER.codes.');
 
 		const viewport = page.viewportSize();
 		const hero = await page.getByTestId('hero').boundingBox();

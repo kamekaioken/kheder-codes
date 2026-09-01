@@ -56,6 +56,17 @@ function handleClick(event: MouseEvent) {
 	>
 		{@render row()}
 	</a>
+{:else if onselect}
+	<!-- A row that goes nowhere but does something is a button, not a link. -->
+	<button
+		{...rest}
+		type="button"
+		class={[classes, 'cursor-pointer text-left']}
+		style:opacity={revealed ? 1 : 0}
+		onclick={onselect}
+	>
+		{@render row()}
+	</button>
 {:else}
 	<div {...rest} class={classes} style:opacity={revealed ? 1 : 0}>
 		{@render row()}

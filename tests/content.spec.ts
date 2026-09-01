@@ -2,18 +2,22 @@ import { expect, test } from '@playwright/test';
 import { openTerminalFromHero, routes } from './helpers';
 
 test.describe('content pages', () => {
-	test('the home page carries the copy and the three chip groups', async ({
+	test('the home page introduces the three of us and the chip groups', async ({
 		page,
 	}) => {
 		await page.goto(routes.de.home);
 		await openTerminalFromHero(page);
 
 		await expect(page.locator('main')).toContainText('$ whoami');
-		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
-		await expect(page.locator('main p').first()).toContainText(
-			'Freiberuflicher Softwareentwickler aus Nürnberg mit 12 Jahren Erfahrung.',
+		await expect(page.locator('h1')).toHaveText(
+			'Servus, wir sind KHEDER.codes.',
 		);
-		await expect(page.locator('main strong')).toHaveText('12 Jahren Erfahrung');
+		await expect(page.locator('main p').first()).toContainText(
+			'Drei Softwareentwickler aus Nürnberg: Kheder, Alan und Andrej.',
+		);
+		await expect(page.locator('main strong')).toHaveText(
+			'Kheder, Alan und Andrej',
+		);
 
 		const donna = page.locator('main a', { hasText: 'DonnaDesk' });
 		await expect(donna).toHaveAttribute('href', 'https://www.donnadesk.de');
@@ -47,6 +51,45 @@ test.describe('content pages', () => {
 		}
 	});
 
+	test('team lists the three profiles as markdown files', async ({ page }) => {
+		await page.goto(routes.de.team);
+
+		await expect(page.locator('main')).toContainText('$ ls ./team');
+		await expect(page.locator('h1')).toHaveText('Team');
+		await expect(page.locator('main li')).toHaveCount(3);
+
+		const entries = page.locator('main li');
+		await expect(entries.nth(0)).toContainText('marlen-kheder.md');
+		await expect(entries.nth(0)).toContainText('Marlen Kheder');
+		await expect(entries.nth(1)).toContainText('Alan Kerkuki');
+		await expect(entries.nth(2)).toContainText('Andrej Ilnizkij');
+
+		await expect(entries.nth(1).locator('a')).toHaveAttribute(
+			'href',
+			'/team/alan-kerkuki',
+		);
+	});
+
+	test('a profile renders its markdown body under its own heading', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.member);
+
+		await expect(page.locator('main')).toContainText(
+			'$ cat ./team/marlen-kheder.md',
+		);
+		await expect(page.locator('h1')).toHaveText('Marlen Kheder');
+		await expect(page.getByTestId('member-role')).toHaveText(
+			'Full-Stack & Voice AI',
+		);
+		await expect(page.locator('main h2').first()).toHaveText(
+			'Woran ich arbeite',
+		);
+		await expect(page.locator('main')).toContainText(
+			'Bei DonnaDesk verantworte ich die Plattform für Voice-AI-Agenten',
+		);
+	});
+
 	test('blog lists the three stubs and the note', async ({ page }) => {
 		await page.goto(routes.de.blog);
 
@@ -78,22 +121,68 @@ test.describe('content pages', () => {
 		);
 	});
 
-	test('referenzen is a plain list without cards', async ({ page }) => {
+	test('referenzen names the client, the project and the stack', async ({
+		page,
+	}) => {
 		await page.goto(routes.de.refs);
 
 		await expect(page.locator('main')).toContainText('$ cat referenzen.md');
 		await expect(page.locator('h1')).toHaveText('Referenzen');
 
-		const entries = page.locator('main li');
-		await expect(entries).toHaveCount(4);
-		await expect(entries.nth(0)).toContainText('Hannover Re');
+		const entries = page.locator('main > section > ul > li');
+		await expect(entries).toHaveCount(5);
+		await expect(entries.nth(0)).toContainText('DonnaDesk GmbH');
 		await expect(entries.nth(0)).toContainText(
-			'Enterprise-Anwendungen für einen der größten Rückversicherer der Welt.',
+			'Plattform für Voice-AI-Agenten, gebaut für Berufsgeheimnisträger.',
 		);
-		await expect(entries.nth(1)).toContainText('DonnaDesk');
-		await expect(entries.nth(2)).toContainText('WTS');
-		await expect(entries.nth(3)).toContainText('GIZ');
-		await expect(entries.nth(3)).not.toHaveClass(/border-b/);
+		await expect(entries.nth(1)).toContainText('Hannover Rück SE');
+		await expect(entries.nth(2)).toContainText(
+			'Gesellschaft für internationale Zusammenarbeit (GIZ)',
+		);
+		await expect(entries.nth(3)).toContainText(
+			'WTS Steuerberatungsgesellschaft mbH',
+		);
+		await expect(entries.nth(4)).toContainText(
+			'Deutsches Zahnärztliches Rechenzentrum GmbH',
+		);
+		await expect(entries.nth(4)).not.toHaveClass(/border-b/);
+
+		await expect(entries.nth(0).locator('ul li')).toContainText([
+			'TypeScript',
+			'Bun',
+			'Elysia',
+			'LiveKit',
+			'SvelteKit',
+			'Astro',
+			'Supabase',
+			'Pulumi',
+		]);
+		await expect(entries.nth(4).locator('ul li')).toContainText([
+			'C#',
+			'WPF',
+			'DevExpress',
+		]);
+	});
+
+	// Copied out of an old CV, the stacks used to carry tooling and versions that
+	// say nothing about the work.
+	test('the stacks name no versions and no dead tooling', async ({ page }) => {
+		await page.goto(routes.de.refs);
+		const body = (await page.locator('main').textContent()) ?? '';
+
+		for (const dropped of [
+			'ASP.NET',
+			'.NET Core',
+			'Visual Studio',
+			'TFVC',
+			'TFS',
+			'AppLink',
+			'Aspose',
+			'Bootstrap',
+		]) {
+			expect(body, dropped).not.toContain(dropped);
+		}
+		expect(body).not.toMatch(/\b\d+\.\d+\b/);
 	});
 
 	test('kontakt lists mail, github and linkedin', async ({ page }) => {
@@ -115,10 +204,10 @@ test.describe('content pages', () => {
 
 	test('every content page ends with the footer', async ({ page }) => {
 		for (const path of [
+			routes.de.team,
 			routes.de.blog,
 			routes.de.refs,
 			routes.de.contact,
-			routes.de.settings,
 		]) {
 			await page.goto(path);
 			const footer = page.locator('footer');
@@ -126,6 +215,87 @@ test.describe('content pages', () => {
 			await expect(footer.locator('img')).toBeVisible();
 			await expect(footer).toContainText('exit 0');
 		}
+	});
+});
+
+test.describe('markdown pages point at their neighbours', () => {
+	const chains = [
+		{
+			name: 'team',
+			pages: [
+				'/team/marlen-kheder',
+				'/team/alan-kerkuki',
+				'/team/andrej-ilnizkij',
+			],
+			files: ['marlen-kheder.md', 'alan-kerkuki.md', 'andrej-ilnizkij.md'],
+		},
+		{
+			name: 'blog',
+			pages: [
+				'/blog/voice-agents-mit-livekit',
+				'/blog/monorepos-ohne-kopfschmerzen',
+				'/blog/astro-fuer-freelancer',
+			],
+			files: [
+				'voice-agents-mit-livekit.md',
+				'monorepos-ohne-kopfschmerzen.md',
+				'astro-fuer-freelancer.md',
+			],
+		},
+		{
+			name: 'legal',
+			pages: ['/impressum', '/datenschutz'],
+			files: ['impressum.md', 'datenschutz.md'],
+		},
+	];
+
+	for (const { name, pages, files } of chains) {
+		test(`${name}: each page links the one before and the one after`, async ({
+			page,
+		}) => {
+			for (const [index, path] of pages.entries()) {
+				await page.goto(path);
+
+				const prev = page.getByTestId('doc-prev');
+				const next = page.getByTestId('doc-next');
+
+				if (index === 0) {
+					await expect(prev, path).toHaveCount(0);
+				} else {
+					await expect(prev, path).toContainText(files[index - 1] as string);
+					await expect(prev, path).toHaveAttribute(
+						'href',
+						pages[index - 1] as string,
+					);
+				}
+
+				if (index === pages.length - 1) {
+					await expect(next, path).toHaveCount(0);
+				} else {
+					await expect(next, path).toContainText(files[index + 1] as string);
+					await expect(next, path).toHaveAttribute(
+						'href',
+						pages[index + 1] as string,
+					);
+				}
+			}
+		});
+	}
+
+	test('the links walk the whole chain forwards and back', async ({ page }) => {
+		await page.goto('/team/marlen-kheder');
+
+		await page.getByTestId('doc-next').click();
+		await expect(page.locator('h1')).toHaveText('Alan Kerkuki');
+
+		await page.getByTestId('doc-next').click();
+		await expect(page.locator('h1')).toHaveText('Andrej Ilnizkij');
+
+		await page.getByTestId('doc-prev').click();
+		await expect(page.locator('h1')).toHaveText('Alan Kerkuki');
+
+		await page.getByTestId('doc-prev').click();
+		await expect(page.locator('h1')).toHaveText('Marlen Kheder');
 	});
 });
 

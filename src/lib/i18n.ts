@@ -11,20 +11,20 @@ export const htmlLang: Record<Locale, string> = {
 
 export type RouteId =
 	| 'home'
+	| 'team'
 	| 'blog'
 	| 'refs'
 	| 'contact'
-	| 'settings'
 	| 'legal'
 	| 'imprint'
 	| 'privacy';
 
 const routePaths: Record<RouteId, Record<Locale, string>> = {
 	home: { de: '/', en: '/en/' },
+	team: { de: '/team', en: '/en/team' },
 	blog: { de: '/blog', en: '/en/blog' },
 	refs: { de: '/referenzen', en: '/en/references' },
 	contact: { de: '/kontakt', en: '/en/contact' },
-	settings: { de: '/einstellungen', en: '/en/settings' },
 	legal: { de: '/rechtliches', en: '/rechtliches' },
 	imprint: { de: '/impressum', en: '/impressum' },
 	privacy: { de: '/datenschutz', en: '/datenschutz' },
@@ -41,6 +41,10 @@ export function pathFor(id: RouteId, locale: Locale): string {
 
 export function blogPostPath(slug: string, locale: Locale): string {
 	return `${routePaths.blog[locale]}/${slug}`;
+}
+
+export function teamMemberPath(slug: string, locale: Locale): string {
+	return `${routePaths.team[locale]}/${slug}`;
 }
 
 export function isLocale(value: string | undefined): value is Locale {

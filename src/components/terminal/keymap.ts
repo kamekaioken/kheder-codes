@@ -1,8 +1,8 @@
 import { cycle, digitIndex } from '../ui/terminal/navigation';
 import type { TerminalSession } from './session.svelte';
 
-/** The main menu and the blog and legal submenus are all lists of links, and
- *  behave identically under the keyboard. */
+/** The main menu and the team, blog and legal submenus are all lists of links,
+ *  and behave identically under the keyboard. */
 type LinkList = {
 	length: number;
 	selected: number;
@@ -42,6 +42,17 @@ function menuList(session: TerminalSession): LinkList {
 			session.selected = index;
 		},
 		open: (index) => session.open(index),
+	};
+}
+
+function memberList(session: TerminalSession): LinkList {
+	return {
+		length: session.members.length,
+		selected: session.memberSelected,
+		select: (index) => {
+			session.memberSelected = index;
+		},
+		open: (index) => session.openMember(index),
 	};
 }
 
@@ -122,8 +133,12 @@ export function handleTerminalKey(
 	const target = event.target as HTMLElement | null;
 	if (isTypingTarget(target)) return;
 
-	/* Enter and Space belong to the focused link or button, not to the menu. */
-	const onControl = Boolean(target?.closest('a, button'));
+	/* Enter and Space belong to the focused link or button, not to the menu — with
+	   one exception: a row that only unfolds a panel has nothing left to do once
+	   that panel is open, so from there the keys belong to the panel it opened. */
+	const onControl = Boolean(
+		target?.closest('a, button:not([data-panel][aria-expanded="true"])'),
+	);
 
 	if (session.boot.phase === 'hero') {
 		if (event.key === 'Enter' || event.key === ' ') {
@@ -150,6 +165,8 @@ export function handleTerminalKey(
 	if (isMenuKey(event.key)) session.dock.expand();
 
 	if (session.submenu === 'settings') handleSettings(session, event, onControl);
+	else if (session.submenu === 'team')
+		handleLinkList(memberList(session), event, onControl);
 	else if (session.submenu === 'blog')
 		handleLinkList(postList(session), event, onControl);
 	else if (session.submenu === 'legal')

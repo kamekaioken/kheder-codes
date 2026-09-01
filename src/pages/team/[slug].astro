@@ -1,0 +1,20 @@
+---
+import { getEntry } from 'astro:content';
+import MemberView from '../../components/views/MemberView.astro';
+import { getMembers } from '../../lib/team';
+
+export async function getStaticPaths() {
+	const members = await getMembers('de');
+
+	return members.map((member) => ({
+		params: { slug: member.slug },
+		props: { member },
+	}));
+}
+
+const { member } = Astro.props;
+const entry = await getEntry('team', `de/${member.slug}`);
+if (!entry) throw new Error(`Missing team profile: de/${member.slug}`);
+---
+
+<MemberView locale="de" {member} {entry} />

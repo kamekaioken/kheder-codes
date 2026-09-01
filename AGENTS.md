@@ -40,8 +40,8 @@ wired up as a Vite plugin (see `astro.config.mjs`) rather than the SvelteKit int
 - Call messages with an explicit locale: `m.menu_about({}, { locale })`. Middleware also
   sets the ambient locale, but passing it keeps components renderable for either language.
 - URLs are owned by `src/lib/i18n.ts`, not by Paraglide's `urlPatterns`: German is served
-  unprefixed (`/ueber-mich`) and English under a translated slug (`/en/about`). Add a route
-  there and its menu entry, `hreflang` links and sitemap alternates follow.
+  unprefixed (`/referenzen`) and English under a translated slug (`/en/references`). Add a
+  route there and its menu entry, `hreflang` links and sitemap alternates follow.
 
 ## Components
 Two layers, one component per file.
@@ -59,6 +59,12 @@ Two layers, one component per file.
   `settings.svelte.ts` the settings submenu (`session.settings`), `dock.svelte.ts` the
   docked panel (`session.dock`), and `keymap.ts` maps keystrokes onto them. Put new state
   in the piece it belongs to, not in the session.
+- Every submenu but one is a route: `team/`, `blog/` and `rechtliches/` open because you are
+  on that page. Settings has no page at all — its menu row is a button with no `href`, and
+  `session.settings.expanded` unfolds the panel over whatever is being read. It is therefore
+  the one submenu that is always in the served markup, hidden by `[data-typed]` rather than
+  by an `{#if}`: without JavaScript nothing could unfold it and the language links would be
+  gone.
 
 ## Layout
 The page is an IDE shell. From 1080px up the terminal takes a column of its own on
@@ -69,11 +75,15 @@ flow as the last block of the document. Lying at the bottom it measures itself i
 `--dock-h` and `[data-shell]` keeps that much room free; in its own column the shell
 keeps `--dock-w` free on the left instead. Nothing needs its own spacing to clear it.
 
+The column is wide enough (`--dock-w`) that every main-menu row — label plus
+description — fits on a single line; keep new menu copy short enough to hold that.
+
 Only the bottom panel can be folded away — through the yellow traffic light, the
 chevron, or a click on the title bar — because only there does it cover anything;
 `TerminalDock` mirrors the same two media queries in `side` and `compact`. On a phone
-it folds itself, staying open only where the menu is still the point (the home screen
-and the submenus) and leaving a content page to be read against the title bar alone;
+it folds itself, staying open only where the menu is still the point — the home screen
+and the submenu indexes, listed in `menuIsThePoint` — and leaving anything meant to be
+read, a content page or one of the `.md` documents, against the title bar alone;
 a manual toggle holds until the route changes. Because the dock never scrolls away,
 the arrows drive the menu from the page and are handed back to the browser as soon as
 the focus sits inside `[data-content]`.
@@ -82,6 +92,16 @@ The intro is an opaque cover over the page (`[data-hero]`, fixed, fading out in 
 term phase), not a switch that removes it, so the home copy stays in the rendered
 document for crawlers. `boot.syncPhase()` makes `[data-shell]` `inert` for as long as
 it is covered, so the keyboard and screen readers cannot wander underneath.
+
+## Headings
+The outline belongs to the page, never to the terminal. `Section.astro` renders the one
+`<h1>` a document has and a markdown body starts at `<h2>` under it; the terminal carries
+the menu and no heading element at all — the wordmark is a `<p>`. `tests/i18n-seo.spec.ts`
+holds that line.
+
+Every markdown page — a team profile, an article, a legal document — links the document
+before and after it in its own collection through `DocNav.astro`, ordered by the `order`
+frontmatter that also orders the submenu.
 
 ## Animations
 `<html transition:animate="none">` in `src/layouts/Base.astro` switches off the page-wide
