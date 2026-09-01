@@ -25,8 +25,12 @@
 	--shadow-term:
 		0 24px 70px light-dark(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.55)),
 		0 2px 8px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.4));
+	--shadow-dock:
+		0 -16px 44px light-dark(rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.55)),
+		0 -2px 8px light-dark(rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.35));
 	--shadow-key: 0 2px 0 var(--color-line);
 	--shadow-tl-red: 0 0 0 3px rgba(255, 95, 87, 0.3);
+	--shadow-tl-yellow: 0 0 0 3px rgba(254, 188, 46, 0.3);
 
 	--animate-blink: blink 1s steps(1) infinite;
 	--animate-fade-up: fade-up 0.5s ease both;
@@ -121,6 +125,25 @@
 
 @utility logo-themed {
 	filter: var(--logo-filter);
+}
+
+/* The shell: with JavaScript the terminal is docked to the bottom edge and the
+   page scrolls behind it, so the content column keeps the panel's measured
+   height free underneath. Without it the panel stays in the flow, where it is
+   simply the last block of the document. */
+:root[data-js="on"] [data-dock] {
+	position: fixed;
+	inset-inline: 0;
+	bottom: 0;
+	z-index: 20;
+}
+
+:root[data-js="on"] {
+	scroll-padding-bottom: calc(var(--dock-h, 0px) + 24px);
+}
+
+:root[data-js="on"] [data-shell] {
+	padding-bottom: var(--dock-h, 0px);
 }
 
 /* Progressive reveal. Without JS every element stays visible, so the full

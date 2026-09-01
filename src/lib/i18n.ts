@@ -11,7 +11,6 @@ export const htmlLang: Record<Locale, string> = {
 
 export type RouteId =
 	| 'home'
-	| 'about'
 	| 'blog'
 	| 'refs'
 	| 'contact'
@@ -22,7 +21,6 @@ export type RouteId =
 
 const routePaths: Record<RouteId, Record<Locale, string>> = {
 	home: { de: '/', en: '/en/' },
-	about: { de: '/ueber-mich', en: '/en/about' },
 	blog: { de: '/blog', en: '/en/blog' },
 	refs: { de: '/referenzen', en: '/en/references' },
 	contact: { de: '/kontakt', en: '/en/contact' },

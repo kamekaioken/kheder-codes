@@ -51,7 +51,7 @@ async function settled(page: Page, testId: string, animation: string) {
 
 test.describe('page transitions', () => {
 	test('navigating animates only the new content', async ({ page }) => {
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 		await waitForMenu(page);
 		await settled(page, 'terminal', 'animate-fade-up');
 		await recordAnimations(page);
@@ -80,11 +80,11 @@ test.describe('page transitions', () => {
 		page,
 		request,
 	}) => {
-		const html = await (await request.get(routes.de.about)).text();
+		const html = await (await request.get(routes.de.refs)).text();
 		const openingTag = html.match(/<div[^>]*data-terminal[^>]*>/)?.[0] ?? '';
 		expect(openingTag).toContain('animate-fade-up');
 
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 		await waitForMenu(page);
 
 		const terminal = page.getByTestId('terminal');
@@ -100,7 +100,7 @@ test.describe('page transitions', () => {
 	test('the blog submenu fades in when it opens, not while browsing on', async ({
 		page,
 	}) => {
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 		await waitForMenu(page);
 		await settled(page, 'terminal', 'animate-fade-up');
 		await recordAnimations(page);

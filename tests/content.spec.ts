@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { routes } from './helpers';
+import { openTerminalFromHero, routes } from './helpers';
 
 test.describe('content pages', () => {
-	test('über mich carries the copy and the three chip groups', async ({
+	test('the home page carries the copy and the three chip groups', async ({
 		page,
 	}) => {
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.home);
+		await openTerminalFromHero(page);
 
 		await expect(page.locator('main')).toContainText('$ whoami');
 		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
@@ -114,7 +115,6 @@ test.describe('content pages', () => {
 
 	test('every content page ends with the footer', async ({ page }) => {
 		for (const path of [
-			routes.de.about,
 			routes.de.blog,
 			routes.de.refs,
 			routes.de.contact,
@@ -132,7 +132,7 @@ test.describe('content pages', () => {
 test.describe('design tokens', () => {
 	test('light theme paints the handoff colours', async ({ page }) => {
 		await page.emulateMedia({ colorScheme: 'light' });
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 
 		await expect(page.locator('body')).toHaveCSS(
 			'background-color',
@@ -144,13 +144,13 @@ test.describe('design tokens', () => {
 			'rgb(110, 110, 115)',
 		);
 		await expect(
-			page.locator('[data-testid="menu-about"] span').first(),
+			page.locator('[data-testid="menu-home"] span').first(),
 		).toHaveCSS('color', 'rgb(14, 126, 138)');
 	});
 
 	test('dark theme paints the handoff colours', async ({ page }) => {
 		await page.emulateMedia({ colorScheme: 'dark' });
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 
 		await expect(page.locator('body')).toHaveCSS(
 			'background-color',
@@ -162,15 +162,15 @@ test.describe('design tokens', () => {
 			'rgb(152, 152, 157)',
 		);
 		await expect(
-			page.locator('[data-testid="menu-about"] span').first(),
+			page.locator('[data-testid="menu-home"] span').first(),
 		).toHaveCSS('color', 'rgb(90, 200, 250)');
 	});
 
-	test('the terminal window is centred at 840px with the specified chrome', async ({
+	test('the terminal is docked at 840px with the specified chrome', async ({
 		page,
 	}) => {
 		await page.setViewportSize({ width: 1200, height: 900 });
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 
 		const box = await page.getByTestId('terminal').boundingBox();
 		expect(box?.width).toBe(840);

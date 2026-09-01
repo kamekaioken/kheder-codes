@@ -10,7 +10,7 @@ const { children, class: className, ...rest }: Props = $props();
 <div
 	{...rest}
 	class={[
-		'mt-3 border-t border-dashed border-line pt-2.5 text-xs text-dim',
+		'border-t border-dashed border-line pt-2.5 text-xs text-dim',
 		className,
 	]}
 >

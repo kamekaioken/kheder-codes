@@ -1,9 +1,8 @@
 import { expect, test } from '@playwright/test';
-import { routes } from './helpers';
+import { openTerminalFromHero, routes } from './helpers';
 
 const pairs = [
 	['home', routes.de.home, routes.en.home],
-	['about', routes.de.about, routes.en.about],
 	['blog', routes.de.blog, routes.en.blog],
 	['refs', routes.de.refs, routes.en.refs],
 	['contact', routes.de.contact, routes.en.contact],
@@ -14,11 +13,11 @@ test.describe('internationalisation', () => {
 	test('german is served without a prefix, english under /en', async ({
 		page,
 	}) => {
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.home);
 		await expect(page.locator('html')).toHaveAttribute('lang', 'de-DE');
 		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
 
-		await page.goto(routes.en.about);
+		await page.goto(routes.en.home);
 		await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
 		await expect(page.locator('h1')).toHaveText("Hi, I'm Kheder.");
 	});
@@ -31,9 +30,11 @@ test.describe('internationalisation', () => {
 	});
 
 	test('the english terminal menu is translated', async ({ page }) => {
-		await page.goto(routes.en.about);
+		await page.goto(routes.en.refs);
 
-		await expect(page.getByTestId('menu-about')).toContainText('about-me');
+		await expect(page.getByTestId('menu-home')).toContainText(
+			'Who I am & what I work with',
+		);
 		await expect(page.getByTestId('menu-refs')).toContainText('references');
 		await expect(page.getByTestId('menu-contact')).toContainText('contact');
 		await expect(page.getByTestId('menu-settings')).toContainText('settings/');
@@ -44,11 +45,11 @@ test.describe('internationalisation', () => {
 	});
 
 	test('english menu links point at english routes', async ({ page }) => {
-		await page.goto(routes.en.about);
+		await page.goto(routes.en.refs);
 
-		await expect(page.getByTestId('menu-about')).toHaveAttribute(
+		await expect(page.getByTestId('menu-home')).toHaveAttribute(
 			'href',
-			routes.en.about,
+			routes.en.home,
 		);
 		await expect(page.getByTestId('menu-refs')).toHaveAttribute(
 			'href',
@@ -102,13 +103,12 @@ test.describe('internationalisation', () => {
 test.describe('SEO basics', () => {
 	const expected = [
 		[routes.de.home, 'kheder.codes — freiberuflicher Softwareentwickler'],
-		[routes.de.about, 'Über mich — kheder.codes'],
 		[routes.de.blog, 'Blog — kheder.codes'],
 		[routes.de.refs, 'Referenzen — kheder.codes'],
 		[routes.de.contact, 'Kontakt — kheder.codes'],
 		[routes.de.settings, 'Einstellungen — kheder.codes'],
 		[routes.de.post, 'Voice Agents mit LiveKit — kheder.codes'],
-		[routes.en.about, 'About me — kheder.codes'],
+		[routes.en.home, 'kheder.codes — freelance software developer'],
 	] as const;
 
 	for (const [path, title] of expected) {
@@ -139,7 +139,6 @@ test.describe('SEO basics', () => {
 		page,
 	}) => {
 		const headings = [
-			[routes.de.about, 'Servus, ich bin Kheder.'],
 			[routes.de.blog, 'Blog'],
 			[routes.de.refs, 'Referenzen'],
 			[routes.de.contact, 'Sag hallo.'],
@@ -156,11 +155,16 @@ test.describe('SEO basics', () => {
 		}
 	});
 
-	test('the home page h1 is the wordmark', async ({ page }) => {
+	test('the home page heading is its own copy, the wordmark is decoration', async ({
+		page,
+	}) => {
 		await page.goto(routes.de.home);
+		await openTerminalFromHero(page);
 
 		await expect(page.locator('h1')).toHaveCount(1);
-		await expect(page.locator('h1')).toHaveText(/KHEDER\s*\.codes/);
+		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
+		await expect(page.locator('h1')).toBeVisible();
+		await expect(page.getByTestId('wordmark')).toHaveText(/KHEDER\s*\.codes/);
 	});
 
 	test('sitemap and robots are published', async ({ request }) => {
@@ -173,7 +177,8 @@ test.describe('SEO basics', () => {
 		const sitemap = await request.get('/sitemap-0.xml');
 		expect(sitemap.status()).toBe(200);
 		const xml = await sitemap.text();
-		expect(xml).toContain('https://www.kheder.codes/ueber-mich');
-		expect(xml).toContain('https://www.kheder.codes/en/about');
+		expect(xml).toContain('https://www.kheder.codes/referenzen');
+		expect(xml).toContain('https://www.kheder.codes/en/references');
+		expect(xml).not.toContain('/ueber-mich');
 	});
 });

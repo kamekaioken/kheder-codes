@@ -3,7 +3,6 @@ import { expect, type Page } from '@playwright/test';
 export const routes = {
 	de: {
 		home: '/',
-		about: '/ueber-mich',
 		blog: '/blog',
 		post: '/blog/voice-agents-mit-livekit',
 		refs: '/referenzen',
@@ -15,7 +14,6 @@ export const routes = {
 	},
 	en: {
 		home: '/en/',
-		about: '/en/about',
 		blog: '/en/blog',
 		post: '/en/blog/voice-agents-with-livekit',
 		refs: '/en/references',

@@ -10,7 +10,7 @@ const secondLine = $derived(boot.heroText.slice(boot.heroBreak));
 const typing = $derived(boot.phase === 'hero');
 </script>
 
-<h1
+<p
 	class="font-display text-center leading-[.95] font-extrabold tracking-[-0.02em]"
 	data-testid="wordmark"
 >
@@ -31,4 +31,4 @@ const typing = $derived(boot.phase === 'hero');
 				variant="text"
 			/>{/if}</span
 	>
-</h1>
+</p>

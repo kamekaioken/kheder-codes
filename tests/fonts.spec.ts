@@ -11,7 +11,7 @@ test.describe('self-hosted fonts', () => {
 			}
 		});
 
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 		await page.waitForLoadState('networkidle');
 
 		expect(external).toEqual([]);
@@ -20,7 +20,7 @@ test.describe('self-hosted fonts', () => {
 	test('the display face is served from the site itself and preloaded', async ({
 		page,
 	}) => {
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 
 		const preload = page.locator('link[rel="preload"][as="font"]');
 		await expect(preload).toHaveCount(1);
@@ -50,7 +50,7 @@ test.describe('self-hosted fonts', () => {
 		page,
 		request,
 	}) => {
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 
 		const href = await page
 			.locator('link[rel="preload"][as="font"]')
@@ -67,7 +67,7 @@ test.describe('self-hosted fonts', () => {
 	}) => {
 		await page.goto(routes.de.home);
 
-		await expect(page.locator('h1')).toHaveCSS(
+		await expect(page.getByTestId('wordmark')).toHaveCSS(
 			'font-family',
 			/^Montserrat-[0-9a-f]+,/,
 		);

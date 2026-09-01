@@ -57,25 +57,25 @@ const labels = buildLabels(locale, items);
 			>{m.skip_to_content({}, { locale })}</a
 		>
 
-		<div class="flex min-h-screen flex-col">
-			<KhederTerminal
-				client:load
-				transition:persist="terminal"
-				{items}
-				posts={toTerminalPosts(posts)}
-				legalDocs={toTerminalLegalDocs(legalDocs)}
-				languages={buildLanguages(locale, alternates)}
-				themeOptions={buildThemeOptions(locale)}
-				{current}
-				{currentPostFile}
-				{showIntro}
-				{labels}
-				homeHref={pathFor('home', locale)}
-				blogHref={pathFor('blog', locale)}
-				legalHref={pathFor('legal', locale)}
-			/>
+		<KhederTerminal
+			client:load
+			transition:persist="terminal"
+			{items}
+			posts={toTerminalPosts(posts)}
+			legalDocs={toTerminalLegalDocs(legalDocs)}
+			languages={buildLanguages(locale, alternates)}
+			themeOptions={buildThemeOptions(locale)}
+			{current}
+			{currentPostFile}
+			{showIntro}
+			{labels}
+			homeHref={pathFor('home', locale)}
+			blogHref={pathFor('blog', locale)}
+			legalHref={pathFor('legal', locale)}
+		/>
 
-			<main id="content" data-hide-on-hero>
+		<div data-shell data-content data-hide-on-hero class="flex min-h-dvh flex-col">
+			<main id="content" class="flex flex-1 flex-col">
 				<slot />
 			</main>
 

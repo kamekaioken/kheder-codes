@@ -100,7 +100,7 @@ test.describe('legal submenu', () => {
 	});
 
 	test('the english menu links the same german documents', async ({ page }) => {
-		await page.goto(routes.en.about);
+		await page.goto(routes.en.refs);
 		await waitForMenu(page);
 
 		await expect(page.getByTestId('menu-legal')).toHaveAttribute(
@@ -251,7 +251,7 @@ test.describe('legal pages', () => {
 	test('both documents are reachable from the footer on every page', async ({
 		page,
 	}) => {
-		for (const path of [routes.de.about, routes.en.about, routes.de.blog]) {
+		for (const path of [routes.de.refs, routes.en.refs, routes.de.blog]) {
 			await page.goto(path);
 
 			const legal = page.getByTestId('footer-legal');
@@ -320,7 +320,7 @@ test.describe('legal pages without JavaScript', () => {
 	test('the menu row and the submenu rows are plain links', async ({
 		page,
 	}) => {
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 
 		await page.getByTestId('menu-legal').click(clickOptions);
 		await expect(page).toHaveURL(new RegExp(`${routes.de.legal}/?$`));
@@ -338,30 +338,20 @@ test.describe('legal pages without JavaScript', () => {
 	});
 });
 
-// Scrolled past the terminal the browser's own scroll keys have to keep working,
-// otherwise a long document such as the Datenschutzerklärung looks frozen.
-async function scrollBelowTerminal(page: Page) {
-	const bottom = () =>
-		page.evaluate(
-			() =>
-				document.querySelector('[data-terminal]')?.getBoundingClientRect()
-					.bottom ?? 0,
-		);
-
-	await page.evaluate(
-		(offset) => window.scrollTo(0, window.scrollY + offset + 100),
-		await bottom(),
-	);
-	await expect.poll(bottom).toBeLessThanOrEqual(0);
+// The docked terminal never scrolls away, so the browser's own scroll keys keep
+// working by handing the arrows to whoever is reading: with the focus inside the
+// page column they scroll a long document such as the Datenschutzerklärung.
+async function readInThePage(page: Page) {
+	await page.locator('main a').first().focus();
 }
 
-test.describe('arrow keys below the terminal', () => {
-	test('scroll the document once the terminal is out of view', async ({
+test.describe('arrow keys while reading', () => {
+	test('scroll the document once the focus is in the page', async ({
 		page,
 	}) => {
 		await page.goto(routes.de.privacy);
 		await waitForMenu(page);
-		await scrollBelowTerminal(page);
+		await readInThePage(page);
 
 		const before = await page.evaluate(() => window.scrollY);
 		await page.keyboard.press('ArrowDown');
@@ -372,20 +362,18 @@ test.describe('arrow keys below the terminal', () => {
 			.toBeGreaterThan(before);
 	});
 
-	test('leave the submenu cursor alone while the terminal is out of view', async ({
+	test('leave the submenu cursor alone while the focus is in the page', async ({
 		page,
 	}) => {
 		await page.goto(routes.de.privacy);
 		await waitForMenu(page);
-		await scrollBelowTerminal(page);
+		await readInThePage(page);
 
 		await page.keyboard.press('ArrowDown');
 		await expect(page.getByTestId('legal-privacy')).toHaveClass(/row-selected/);
 	});
 
-	test('still drive the submenu while the terminal is in view', async ({
-		page,
-	}) => {
+	test('still drive the submenu from the page itself', async ({ page }) => {
 		await page.goto(routes.de.privacy);
 		await waitForMenu(page);
 
@@ -393,10 +381,10 @@ test.describe('arrow keys below the terminal', () => {
 		await expect(page.getByTestId('legal-imprint')).toHaveClass(/row-selected/);
 	});
 
-	test('⎋ still steps back from the bottom of a document', async ({ page }) => {
+	test('⎋ still steps back while reading a document', async ({ page }) => {
 		await page.goto(routes.de.privacy);
 		await waitForMenu(page);
-		await scrollBelowTerminal(page);
+		await readInThePage(page);
 
 		await page.keyboard.press('Escape');
 		await expect(page).toHaveURL(new RegExp(`${routes.de.legal}/?$`));

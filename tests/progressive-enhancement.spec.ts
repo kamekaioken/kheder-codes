@@ -13,10 +13,11 @@ test.describe('without JavaScript', () => {
 	}) => {
 		await page.goto(routes.de.home);
 
-		await expect(page.locator('h1')).toHaveText(/KHEDER\s*\.codes/);
+		await expect(page.getByTestId('wordmark')).toHaveText(/KHEDER\s*\.codes/);
+		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
 		await expect(page.getByTestId('hero')).toBeVisible();
 		await expect(page.getByTestId('terminal')).toBeVisible();
-		await expect(page.getByTestId('menu-about')).toBeVisible();
+		await expect(page.getByTestId('menu-home')).toBeVisible();
 		await expect(page.getByTestId('menu-settings')).toBeVisible();
 	});
 
@@ -29,7 +30,7 @@ test.describe('without JavaScript', () => {
 	});
 
 	test('content pages render their copy', async ({ page }) => {
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.home);
 
 		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
 		await expect(page.locator('main')).toContainText('12 Jahren Erfahrung');

@@ -7,7 +7,7 @@ import {
 } from './helpers';
 
 const menuCopy = [
-	['menu-about', 'über-mich', 'Wer ich bin & womit ich arbeite'],
+	['menu-home', '~', 'Wer ich bin & womit ich arbeite'],
 	['menu-blog', 'blog/', 'Notizen & Artikel'],
 	['menu-refs', 'referenzen', 'Projekte & Kunden'],
 	['menu-contact', 'kontakt', 'Sag hallo'],
@@ -20,7 +20,7 @@ test.describe('terminal as navigation', () => {
 	test('shows the seven menu options in order with the exact copy', async ({
 		page,
 	}) => {
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 		await waitForMenu(page);
 
 		const rows = page.locator('[data-testid^="menu-"]');
@@ -56,7 +56,7 @@ test.describe('terminal as navigation', () => {
 		await page.goto('/');
 		await openTerminalFromHero(page);
 
-		await expect(page.getByTestId('menu-about')).toHaveClass(/row-selected/);
+		await expect(page.getByTestId('menu-home')).toHaveClass(/row-selected/);
 
 		await page.keyboard.press('ArrowDown');
 		await page.keyboard.press('ArrowDown');
@@ -88,13 +88,13 @@ test.describe('terminal as navigation', () => {
 		await page.goto('/');
 		await openTerminalFromHero(page);
 
-		await page.getByTestId('menu-about').click();
-		await expect(page).toHaveURL(new RegExp(`${routes.de.about}/?$`));
-		await expect(page.locator('h1')).toHaveText('Servus, ich bin Kheder.');
+		await page.getByTestId('menu-blog').click();
+		await expect(page).toHaveURL(new RegExp(`${routes.de.blog}/?$`));
+		await expect(page.locator('h1')).toHaveText('Blog');
 	});
 
 	test('donnadesk is an external link in a new tab', async ({ page }) => {
-		await page.goto(routes.de.about);
+		await page.goto(routes.de.refs);
 		await waitForMenu(page);
 
 		const donna = page.getByTestId('menu-donna');
@@ -109,8 +109,8 @@ test.describe('terminal as navigation', () => {
 		await page.goto('/');
 		await openTerminalFromHero(page);
 
-		await page.getByTestId('menu-about').click();
-		await expect(page).toHaveURL(new RegExp(`${routes.de.about}/?$`));
+		await page.getByTestId('menu-refs').click();
+		await expect(page).toHaveURL(new RegExp(`${routes.de.refs}/?$`));
 
 		await expect(page.getByTestId('terminal')).toBeVisible();
 		await expect(page.getByTestId('menu-settings')).toHaveCSS('opacity', '1');

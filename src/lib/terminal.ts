@@ -29,7 +29,6 @@ export type ThemeOption = { value: Theme; name: string };
 
 export type TerminalRoute =
 	| 'home'
-	| 'about'
 	| 'blog'
 	| 'refs'
 	| 'contact'
@@ -45,7 +44,6 @@ export type TerminalSubmenu = 'blog' | 'settings' | 'legal' | null;
  *  which is also how the main menu knows which row to mark as current. */
 export const submenuOf: Record<TerminalRoute, TerminalSubmenu> = {
 	home: null,
-	about: null,
 	refs: null,
 	contact: null,
 	blog: 'blog',
@@ -79,10 +77,10 @@ export function buildMenu(locale: Locale): TerminalItem[] {
 
 	return [
 		{
-			id: 'about',
-			name: m.menu_about({}, o),
-			desc: m.menu_about_desc({}, o),
-			href: pathFor('about', locale),
+			id: 'home',
+			name: m.menu_home({}, o),
+			desc: m.menu_home_desc({}, o),
+			href: pathFor('home', locale),
 			external: false,
 			submenu: null,
 		},
@@ -155,6 +153,9 @@ export function buildLabels(locale: Locale, items: TerminalItem[]) {
 		heroKey: m.hero_key({}, o),
 		heroHint: m.hero_hint({}, o),
 		closeTitle: m.term_close_title({}, o),
+		minimizeTitle: m.term_minimize_title({}, o),
+		collapseTitle: m.term_collapse_title({}, o),
+		restoreTitle: m.term_restore_title({}, o),
 		/* Keyed by submenu, so the screen reads them as `titles[submenu ?? 'main']`. */
 		titles: {
 			main: m.term_title({ cwd: '~' }, o),

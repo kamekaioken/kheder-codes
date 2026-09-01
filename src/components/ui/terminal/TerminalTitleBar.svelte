@@ -5,9 +5,16 @@ import type { HTMLAttributes } from 'svelte/elements';
 type Props = HTMLAttributes<HTMLDivElement> & {
 	children: Snippet;
 	controls?: Snippet;
+	actions?: Snippet;
 };
 
-const { children, controls, class: className, ...rest }: Props = $props();
+const {
+	children,
+	controls,
+	actions,
+	class: className,
+	...rest
+}: Props = $props();
 </script>
 
 <div
@@ -25,4 +32,7 @@ const { children, controls, class: className, ...rest }: Props = $props();
 	>
 		{@render children()}
 	</div>
+	{#if actions}
+		<div class="relative ml-auto flex items-center">{@render actions()}</div>
+	{/if}
 </div>

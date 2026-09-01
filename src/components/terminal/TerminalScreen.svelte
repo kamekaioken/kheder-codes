@@ -13,61 +13,131 @@ import SettingsSubmenu from './SettingsSubmenu.svelte';
 import { getSession } from './session.svelte';
 
 const session = getSession();
+const dock = session.dock;
 
-let screen: HTMLElement | null = null;
+let panel: HTMLElement | null = null;
+let body: HTMLElement | null = null;
+
+const toggleLabel = $derived(
+	dock.open ? session.labels.collapseTitle : session.labels.restoreTitle,
+);
 
 onMount(() => {
-	session.bindScreen(screen);
-	return () => session.bindScreen(null);
+	dock.bindPanel(panel);
+	dock.bindBody(body);
+	return () => {
+		dock.bindPanel(null);
+		dock.bindBody(null);
+	};
 });
+
+/* A submenu writes a new prompt at the bottom of the panel, so follow it there
+   and wind back to the first prompt once it closes again. */
+$effect(() => {
+	if (session.submenu === null) dock.rewind();
+	else dock.follow();
+});
+
+/** The title bar doubles as the handle, so a click anywhere but on one of its
+ *  buttons folds the panel away. */
+function onBarClick(event: MouseEvent) {
+	if ((event.target as HTMLElement).closest('button')) return;
+	dock.toggle();
+}
 </script>
 
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	bind:this={screen}
+	bind:this={panel}
+	data-dock
 	data-terminal
 	data-testid="terminal"
+	data-open={dock.open}
 	class={[
-		'mx-auto box-border w-full max-w-[840px] px-4 pt-[clamp(20px,5vh,56px)]',
+		'mx-auto box-border w-full max-w-[840px] sm:px-4',
 		session.boot.entrance.active && 'animate-fade-up',
 	]}
 >
-	<TerminalWindow>
-		<TerminalTitleBar>
+	<TerminalWindow docked class="pb-[env(safe-area-inset-bottom)]">
+		<TerminalTitleBar
+			class="cursor-pointer"
+			data-testid="dock-bar"
+			onclick={onBarClick}
+		>
 			{#snippet controls()}
 				<TerminalTrafficLights
 					closeLabel={session.labels.closeTitle}
 					onclose={() => session.resetToHero()}
+					minimizeLabel={session.labels.minimizeTitle}
+					onminimize={() => dock.toggle()}
 				/>
 			{/snippet}
+
+			{#snippet actions()}
+				<button
+					type="button"
+					class="cursor-pointer px-1 text-[13px] leading-none text-dim"
+					aria-expanded={dock.open}
+					aria-controls="terminal-body"
+					aria-label={toggleLabel}
+					title={toggleLabel}
+					data-testid="dock-toggle"
+					onclick={() => dock.toggle()}>{dock.open ? '⌄' : '⌃'}</button
+				>
+			{/snippet}
+
 			<span data-testid="term-title">{session.title}</span>
 		</TerminalTitleBar>
 
-		<TerminalBody>
-			<TerminalPrompt
-				user="kheder"
-				host="mbp"
-				command={session.boot.commandText}
-				typed={session.boot.command.count}
-				cursor={session.boot.phase === 'term' && !session.boot.menuOn}
-			/>
+		<div
+			class="grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none"
+			style:grid-template-rows={dock.open ? '1fr' : '0fr'}
+		>
+			<div
+				class={[
+					'min-h-0 overflow-hidden transition-[visibility] motion-reduce:transition-none',
+					dock.open ? 'visible' : 'invisible delay-200',
+				]}
+				inert={!dock.open}
+			>
+				<div id="terminal-body" class="flex max-h-[min(50dvh,460px)] flex-col">
+					<div
+						bind:this={body}
+						class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+					>
+						<TerminalBody>
+							<TerminalPrompt
+								user="kheder"
+								host="mbp"
+								command={session.boot.commandText}
+								typed={session.boot.command.count}
+								cursor={session.boot.phase === 'term' && !session.boot.menuOn}
+							/>
 
-			<div data-menu data-typed={session.boot.menuOn}>
-				<MainMenu />
+							<div data-menu data-typed={session.boot.menuOn}>
+								<MainMenu />
 
-				{#if session.submenu === 'blog'}
-					<BlogSubmenu />
-				{/if}
+								{#if session.submenu === 'blog'}
+									<BlogSubmenu />
+								{/if}
 
-				{#if session.submenu === 'settings'}
-					<SettingsSubmenu />
-				{/if}
+								{#if session.submenu === 'settings'}
+									<SettingsSubmenu />
+								{/if}
 
-				{#if session.submenu === 'legal'}
-					<LegalSubmenu />
-				{/if}
+								{#if session.submenu === 'legal'}
+									<LegalSubmenu />
+								{/if}
+							</div>
+						</TerminalBody>
+					</div>
 
-				<TerminalHint data-testid="hint-line">{session.hint}</TerminalHint>
+					<div data-typed={session.boot.menuOn} class="px-[22px] pb-4">
+						<TerminalHint data-testid="hint-line">{session.hint}</TerminalHint>
+					</div>
+				</div>
 			</div>
-		</TerminalBody>
+		</div>
 	</TerminalWindow>
 </div>

@@ -16,6 +16,10 @@ onMount(() => session.attach());
 $effect(() => {
 	session.boot.syncPhase();
 });
+
+$effect(() => {
+	session.dock.syncRoute(session.current, session.submenu);
+});
 </script>
 
 {#if session.showIntro}

@@ -6,6 +6,7 @@ import {
 	type TerminalRoute,
 } from '../../lib/terminal';
 import { BootSequence } from './boot.svelte';
+import { TerminalDock } from './dock.svelte';
 import { handleTerminalKey } from './keymap';
 import { SettingsPanel } from './settings.svelte';
 
@@ -15,14 +16,14 @@ const DEFAULT_SPEED = 70;
  * What the kheder terminal knows about the page it is on: the menu, the current
  * route and where the cursors point. The island creates one and puts it in
  * context, so no subcomponent needs props. The intro lives in `boot`, the
- * settings submenu in `settings`.
+ * settings submenu in `settings` and the docked panel in `dock`.
  */
 export class TerminalSession {
 	readonly boot: BootSequence;
 	readonly settings: SettingsPanel;
+	readonly dock = new TerminalDock();
 
 	#props: () => TerminalProps;
-	#screen: HTMLElement | null = null;
 
 	constructor(props: () => TerminalProps) {
 		this.#props = props;
@@ -122,22 +123,11 @@ export class TerminalSession {
 		privacy: this.legalHref,
 	});
 
-	/** `TerminalScreen` hands over its window element on mount. */
-	bindScreen(element: HTMLElement | null): void {
-		this.#screen = element;
-	}
-
-	/** Whether any part of the terminal window is on screen. Unbound (server, or
-	 *  before mount) it counts as visible, so nothing is swallowed by accident. */
-	get screenInView(): boolean {
-		const rect = this.#screen?.getBoundingClientRect();
-		if (!rect) return true;
-		return rect.bottom > 0 && rect.top < window.innerHeight;
-	}
-
 	attach(): () => void {
 		this.settings.load();
 		this.boot.begin();
+
+		const detachDock = this.dock.attach();
 
 		const onKey = (event: KeyboardEvent) => this.handleKey(event);
 		const onScroll = () => this.boot.openTerminal();
@@ -150,6 +140,7 @@ export class TerminalSession {
 
 		return () => {
 			this.boot.dispose();
+			detachDock();
 			window.removeEventListener('keydown', onKey);
 			window.removeEventListener('wheel', onScroll);
 			window.removeEventListener('touchmove', onScroll);

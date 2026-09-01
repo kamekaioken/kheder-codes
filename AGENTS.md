@@ -56,8 +56,23 @@ Two layers, one component per file.
   takes props, typed as `TerminalProps` in `src/lib/terminal.ts`.
 - The session holds the page's own facts (menu, route, row cursors, navigation) and composes
   the rest: `boot.svelte.ts` owns the intro choreography (`session.boot`),
-  `settings.svelte.ts` the settings submenu (`session.settings`), and `keymap.ts` maps
-  keystrokes onto both. Put new state in the piece it belongs to, not in the session.
+  `settings.svelte.ts` the settings submenu (`session.settings`), `dock.svelte.ts` the
+  docked panel (`session.dock`), and `keymap.ts` maps keystrokes onto them. Put new state
+  in the piece it belongs to, not in the session.
+
+## Layout
+The page is an IDE shell: the content column scrolls underneath a terminal docked to the
+bottom edge. `[data-dock]` is only fixed under `:root[data-js="on"]`, so without JavaScript
+the panel stays in the flow as the last block of the document. It measures itself into
+`--dock-h` and `[data-shell]` keeps exactly that much room free at the bottom — nothing
+needs its own spacing to clear the dock.
+
+The panel is open on a wide screen and folds to its title bar through the yellow traffic
+light, the chevron, or a click on the bar itself. On a phone `TerminalDock` opens it only
+where the menu is still the point — the home screen and the submenus — and leaves a content
+page to be read against the bar alone; a manual toggle holds until the route changes.
+Because the dock never scrolls away, the arrows drive the menu from the page and are handed
+back to the browser as soon as the focus sits inside `[data-content]`.
 
 ## Animations
 `<html transition:animate="none">` in `src/layouts/Base.astro` switches off the page-wide

@@ -16,6 +16,18 @@ function isTypingTarget(target: HTMLElement | null): boolean {
 	);
 }
 
+function isReading(target: HTMLElement | null): boolean {
+	return Boolean(target?.closest('[data-content]'));
+}
+
+/** The keys the docked menu answers to, which are also the keys that pop it back
+ *  open when it sits collapsed. */
+function isMenuKey(key: string): boolean {
+	return (
+		key.startsWith('Arrow') || key === 'Enter' || digitIndex(key, 9) !== null
+	);
+}
+
 function step(key: string): -1 | 1 | 0 {
 	if (key === 'ArrowDown' || key === 'ArrowRight') return 1;
 	if (key === 'ArrowUp' || key === 'ArrowLeft') return -1;
@@ -130,10 +142,12 @@ export function handleTerminalKey(
 
 	if (!session.boot.menuOn) return;
 
-	/* Scrolled past the terminal the arrows belong to the page again, so a long
-	   document stays scrollable from the keyboard. ⎋, ⏎ and the digits still
-	   reach the menu from anywhere. */
-	if (event.key.startsWith('Arrow') && !session.screenInView) return;
+	/* The dock never scrolls away, so the arrows only belong to the menu while
+	   nobody is reading: with the focus inside the content column they scroll the
+	   page again, as ⇞⇟, the space bar and ⌘↑↓ do everywhere. */
+	if (event.key.startsWith('Arrow') && isReading(target)) return;
+
+	if (isMenuKey(event.key)) session.dock.expand();
 
 	if (session.submenu === 'settings') handleSettings(session, event, onControl);
 	else if (session.submenu === 'blog')

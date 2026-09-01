@@ -84,8 +84,8 @@ test.describe('settings submenu', () => {
 			'rgb(22, 22, 24)',
 		);
 
-		await page.getByTestId('menu-about').click();
-		await expect(page).toHaveURL(new RegExp(`${routes.de.about}/?$`));
+		await page.getByTestId('menu-home').click();
+		await expect(page).toHaveURL(new RegExp('/$'));
 		await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
 		await page.goto(routes.de.contact);
