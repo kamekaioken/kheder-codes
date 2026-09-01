@@ -130,6 +130,11 @@ export function handleTerminalKey(
 
 	if (!session.boot.menuOn) return;
 
+	/* Scrolled past the terminal the arrows belong to the page again, so a long
+	   document stays scrollable from the keyboard. ⎋, ⏎ and the digits still
+	   reach the menu from anywhere. */
+	if (event.key.startsWith('Arrow') && !session.screenInView) return;
+
 	if (session.submenu === 'settings') handleSettings(session, event, onControl);
 	else if (session.submenu === 'blog')
 		handleLinkList(postList(session), event, onControl);

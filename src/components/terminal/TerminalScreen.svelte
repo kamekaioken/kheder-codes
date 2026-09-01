@@ -1,4 +1,5 @@
 <script lang="ts">
+import { onMount } from 'svelte';
 import TerminalBody from '../ui/terminal/TerminalBody.svelte';
 import TerminalHint from '../ui/terminal/TerminalHint.svelte';
 import TerminalPrompt from '../ui/terminal/TerminalPrompt.svelte';
@@ -12,9 +13,17 @@ import SettingsSubmenu from './SettingsSubmenu.svelte';
 import { getSession } from './session.svelte';
 
 const session = getSession();
+
+let screen: HTMLElement | null = null;
+
+onMount(() => {
+	session.bindScreen(screen);
+	return () => session.bindScreen(null);
+});
 </script>
 
 <div
+	bind:this={screen}
 	data-terminal
 	data-testid="terminal"
 	class={[

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import { routes, waitForMenu } from './helpers';
 
 test.describe('legal submenu', () => {
@@ -335,5 +335,73 @@ test.describe('legal pages without JavaScript', () => {
 
 		await expect(page.locator('h1')).toHaveText('Impressum');
 		await expect(page.locator('main')).toContainText('DE322286907');
+	});
+});
+
+// Scrolled past the terminal the browser's own scroll keys have to keep working,
+// otherwise a long document such as the Datenschutzerklärung looks frozen.
+async function scrollBelowTerminal(page: Page) {
+	const bottom = () =>
+		page.evaluate(
+			() =>
+				document.querySelector('[data-terminal]')?.getBoundingClientRect()
+					.bottom ?? 0,
+		);
+
+	await page.evaluate(
+		(offset) => window.scrollTo(0, window.scrollY + offset + 100),
+		await bottom(),
+	);
+	await expect.poll(bottom).toBeLessThanOrEqual(0);
+}
+
+test.describe('arrow keys below the terminal', () => {
+	test('scroll the document once the terminal is out of view', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.privacy);
+		await waitForMenu(page);
+		await scrollBelowTerminal(page);
+
+		const before = await page.evaluate(() => window.scrollY);
+		await page.keyboard.press('ArrowDown');
+		await page.keyboard.press('ArrowDown');
+
+		await expect
+			.poll(() => page.evaluate(() => window.scrollY))
+			.toBeGreaterThan(before);
+	});
+
+	test('leave the submenu cursor alone while the terminal is out of view', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.privacy);
+		await waitForMenu(page);
+		await scrollBelowTerminal(page);
+
+		await page.keyboard.press('ArrowDown');
+		await expect(page.getByTestId('legal-privacy')).toHaveClass(/row-selected/);
+	});
+
+	test('still drive the submenu while the terminal is in view', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.privacy);
+		await waitForMenu(page);
+
+		await page.keyboard.press('ArrowDown');
+		await expect(page.getByTestId('legal-imprint')).toHaveClass(/row-selected/);
+	});
+
+	test('⎋ still steps back from the bottom of a document', async ({ page }) => {
+		await page.goto(routes.de.privacy);
+		await waitForMenu(page);
+		await scrollBelowTerminal(page);
+
+		await page.keyboard.press('Escape');
+		await expect(page).toHaveURL(new RegExp(`${routes.de.legal}/?$`));
+
+		await page.keyboard.press('ArrowDown');
+		await expect(page.getByTestId('legal-privacy')).toHaveClass(/row-selected/);
 	});
 });

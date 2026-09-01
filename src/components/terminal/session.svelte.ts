@@ -22,6 +22,7 @@ export class TerminalSession {
 	readonly settings: SettingsPanel;
 
 	#props: () => TerminalProps;
+	#screen: HTMLElement | null = null;
 
 	constructor(props: () => TerminalProps) {
 		this.#props = props;
@@ -120,6 +121,19 @@ export class TerminalSession {
 		imprint: this.legalHref,
 		privacy: this.legalHref,
 	});
+
+	/** `TerminalScreen` hands over its window element on mount. */
+	bindScreen(element: HTMLElement | null): void {
+		this.#screen = element;
+	}
+
+	/** Whether any part of the terminal window is on screen. Unbound (server, or
+	 *  before mount) it counts as visible, so nothing is swallowed by accident. */
+	get screenInView(): boolean {
+		const rect = this.#screen?.getBoundingClientRect();
+		if (!rect) return true;
+		return rect.bottom > 0 && rect.top < window.innerHeight;
+	}
 
 	attach(): () => void {
 		this.settings.load();
