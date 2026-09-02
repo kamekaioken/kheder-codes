@@ -7,8 +7,8 @@ import {
 } from './helpers';
 
 const menuCopy = [
-	['menu-home', '~', 'Wer wir sind'],
-	['menu-team', 'team/', 'Kheder, Alan & Andrej'],
+	['menu-home', '~', 'Startseite'],
+	['menu-team', 'team/', 'Wer wir sind'],
 	['menu-blog', 'blog/', 'Notizen & Artikel'],
 	['menu-refs', 'referenzen', 'Projekte & Kunden'],
 	['menu-contact', 'kontakt', 'Sag hallo'],
@@ -69,6 +69,28 @@ test.describe('terminal as navigation', () => {
 			for (const [testId] of menuCopy) {
 				const box = await page.getByTestId(testId).boundingBox();
 				expect(box?.height ?? 0, `${testId} at ${width}px`).toBeLessThan(40);
+			}
+		}
+	});
+
+	test('so does every submenu row, captions included', async ({ page }) => {
+		const rows = [
+			[routes.de.team, ['member-1', 'member-2', 'member-3']],
+			[routes.de.blog, ['post-1', 'post-2', 'post-3']],
+			[routes.de.legal, ['legal-imprint', 'legal-privacy']],
+		] as const;
+
+		for (const width of [1080, 1440, 1920]) {
+			await page.setViewportSize({ width, height: 900 });
+
+			for (const [path, testIds] of rows) {
+				await page.goto(path);
+				await waitForMenu(page);
+
+				for (const testId of testIds) {
+					const box = await page.getByTestId(testId).boundingBox();
+					expect(box?.height ?? 0, `${testId} at ${width}px`).toBeLessThan(40);
+				}
 			}
 		}
 	});
@@ -180,9 +202,9 @@ test.describe('team submenu', () => {
 		await waitForMenu(page);
 
 		const members = [
-			['marlen-kheder.md', 'Full-Stack & Voice AI'],
-			['alan-kerkuki.md', 'Entwickler & Mitgründer'],
-			['andrej-ilnizkij.md', 'Entwickler & Mitgründer'],
+			['marlen-kheder.md', 'Senior Developer & Software Architect'],
+			['alan-kerkuki.md', 'Backend Developer & Platform Engineer'],
+			['andrej-ilnizkij.md', 'Frontend Developer & UX Designer'],
 		];
 
 		for (const [index, [file, role]] of members.entries()) {

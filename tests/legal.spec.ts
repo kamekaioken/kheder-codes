@@ -37,12 +37,16 @@ test.describe('legal submenu', () => {
 		await expect(page.getByTestId('legal-imprint')).toContainText(
 			'impressum.md',
 		);
+		await expect(page.getByTestId('legal-imprint')).toContainText('Impressum');
 		await expect(page.getByTestId('legal-imprint')).toHaveAttribute(
 			'href',
 			routes.de.imprint,
 		);
 		await expect(page.getByTestId('legal-privacy')).toContainText(
 			'datenschutz.md',
+		);
+		await expect(page.getByTestId('legal-privacy')).toContainText(
+			'Datenschutzerklärung',
 		);
 		await expect(page.getByTestId('legal-privacy')).toHaveAttribute(
 			'href',

@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
 import { openTerminalFromHero, routes, waitForMenu } from './helpers';
 
 const phone = { width: 390, height: 844 } as const;
@@ -29,6 +29,18 @@ function viewportHeight(page: Page) {
 	return page.evaluate(() => window.innerHeight);
 }
 
+/** Folding and unfolding are animated, so a measurement taken straight after a
+ *  click catches the panel mid-slide. Poll until it has come to rest. */
+async function restsOnTheBottomEdge(page: Page, locator: Locator) {
+	const height = await viewportHeight(page);
+	await expect
+		.poll(async () => {
+			const box = await locator.boundingBox();
+			return Math.round((box?.y ?? 0) + (box?.height ?? 0));
+		})
+		.toBe(height);
+}
+
 test.describe('the terminal along the bottom edge', () => {
 	test.use({ viewport: narrow });
 
@@ -36,22 +48,18 @@ test.describe('the terminal along the bottom edge', () => {
 		page,
 	}) => {
 		await page.goto(routes.de.privacy);
+		/* A document folds the panel; open it again to measure it at full height. */
+		await page.getByTestId('dock-bar').click();
 		await settled(page);
 
-		const height = await viewportHeight(page);
-		expect((await dockBox(page)).y + (await dockBox(page)).height).toBeCloseTo(
-			height,
-			0,
-		);
+		await restsOnTheBottomEdge(page, dock(page));
 
+		/* The page scrolls underneath; the panel does not move with it. */
 		await page.mouse.wheel(0, 900);
 		await expect
-			.poll(async () => Math.round((await dockBox(page)).y))
-			.toBeLessThan(height);
-		expect((await dockBox(page)).y + (await dockBox(page)).height).toBeCloseTo(
-			height,
-			0,
-		);
+			.poll(() => page.evaluate(() => window.scrollY))
+			.toBeGreaterThan(0);
+		await restsOnTheBottomEdge(page, dock(page));
 		await expect(page.getByTestId('menu-home')).toBeVisible();
 	});
 
@@ -87,7 +95,7 @@ test.describe('folding the panel away', () => {
 	test('the chevron collapses the panel to its title bar and back', async ({
 		page,
 	}) => {
-		await page.goto(routes.de.refs);
+		await page.goto(routes.de.blog);
 		await settled(page);
 
 		const open = (await dockBox(page)).height;
@@ -113,7 +121,7 @@ test.describe('folding the panel away', () => {
 	test('the yellow traffic light and the title bar itself fold it too', async ({
 		page,
 	}) => {
-		await page.goto(routes.de.refs);
+		await page.goto(routes.de.blog);
 		await waitForMenu(page);
 
 		await page.getByRole('button', { name: 'Minimieren' }).click();
@@ -125,9 +133,6 @@ test.describe('folding the panel away', () => {
 
 	test('a menu key pops the panel back open', async ({ page }) => {
 		await page.goto(routes.de.refs);
-		await waitForMenu(page);
-
-		await page.getByTestId('dock-toggle').click();
 		await expect(page.getByTestId('menu-home')).toBeHidden();
 
 		await page.keyboard.press('ArrowDown');
@@ -139,8 +144,6 @@ test.describe('folding the panel away', () => {
 		page,
 	}) => {
 		await page.goto(routes.de.refs);
-		await waitForMenu(page);
-		await page.getByTestId('dock-toggle').click();
 
 		await expect(page.getByTestId('menu-home')).toBeHidden();
 		await expect(page.getByTestId('menu-home')).not.toBeFocused();
@@ -245,42 +248,6 @@ test.describe('on a phone', () => {
 		await expect(page.getByTestId('post-1')).toBeInViewport();
 	});
 
-	// Picking a `.md` file is asking to read it, so the panel gets out of the way
-	// instead of leaving the document to a sliver of screen.
-	test('picking a markdown file folds the panel away', async ({ page }) => {
-		await page.goto(routes.de.team);
-		await waitForMenu(page);
-
-		await page.getByTestId('member-1').click();
-		await expect(page).toHaveURL(new RegExp(`${routes.de.member}/?$`));
-
-		await expect(page.getByTestId('member-1')).toBeHidden();
-		await expect
-			.poll(async () => (await dockBox(page)).height)
-			.toBeLessThan(80);
-		await expect(page.locator('h1')).toHaveText('Marlen Kheder');
-	});
-
-	test('every kind of document folds it, and its own index does not', async ({
-		page,
-	}) => {
-		for (const path of [routes.de.post, routes.de.privacy, routes.de.member]) {
-			await page.goto(path);
-			await expect(page.getByTestId('terminal'), path).toBeVisible();
-			await expect
-				.poll(async () => (await dockBox(page)).height, { message: path })
-				.toBeLessThan(80);
-		}
-
-		for (const path of [routes.de.team, routes.de.blog, routes.de.legal]) {
-			await page.goto(path);
-			await waitForMenu(page);
-			await expect
-				.poll(async () => (await dockBox(page)).height, { message: path })
-				.toBeGreaterThan(80);
-		}
-	});
-
 	test('tapping the bar opens it, and the next page folds it away again', async ({
 		page,
 	}) => {
@@ -294,6 +261,90 @@ test.describe('on a phone', () => {
 		await expect(page).toHaveURL(new RegExp(`${routes.de.contact}/?$`));
 		await expect(page.getByTestId('menu-contact')).toBeHidden();
 		await expect(page.locator('h1')).toHaveText('Sag hallo.');
+	});
+});
+
+// What decides is whether the panel covers the page, not how small the screen
+// is: wherever it lies along the bottom edge it folds itself away for anything
+// that is there to be read.
+for (const [name, viewport] of [
+	['on a phone', phone],
+	['in a narrow window', narrow],
+] as const) {
+	test.describe(`the panel folds itself ${name}`, () => {
+		test.use({ viewport });
+
+		test('picking a markdown file folds it away', async ({ page }) => {
+			await page.goto(routes.de.team);
+			await waitForMenu(page);
+
+			await page.getByTestId('member-1').click();
+			await expect(page).toHaveURL(new RegExp(`${routes.de.member}/?$`));
+
+			await expect
+				.poll(async () => (await dockBox(page)).height)
+				.toBeLessThan(80);
+			await expect(page.locator('h1')).toHaveText('Marlen Kheder');
+		});
+
+		test('every kind of document folds it, and no index does', async ({
+			page,
+		}) => {
+			for (const path of [
+				routes.de.post,
+				routes.de.privacy,
+				routes.de.member,
+			]) {
+				await page.goto(path);
+				await expect(page.getByTestId('terminal'), path).toBeVisible();
+				await expect
+					.poll(async () => (await dockBox(page)).height, { message: path })
+					.toBeLessThan(80);
+			}
+
+			for (const path of [routes.de.team, routes.de.blog, routes.de.legal]) {
+				await page.goto(path);
+				await waitForMenu(page);
+				await expect
+					.poll(async () => (await dockBox(page)).height, { message: path })
+					.toBeGreaterThan(80);
+			}
+		});
+
+		// Folding is not hiding: the title bar stays put as the handle that brings
+		// the menu back.
+		test('the title bar stays, and tapping it brings the menu back', async ({
+			page,
+		}) => {
+			await page.goto(routes.de.member);
+			await expect(page.getByTestId('terminal')).toBeVisible();
+
+			const bar = page.getByTestId('dock-bar');
+			await expect(bar).toBeVisible();
+			await expect(bar).toContainText('kheder — ~/team');
+
+			await expect
+				.poll(async () => Math.round((await dockBox(page)).height))
+				.toBeLessThan(80);
+			await restsOnTheBottomEdge(page, bar);
+
+			expect((await bar.boundingBox())?.height ?? 0).toBeGreaterThan(30);
+
+			await bar.click();
+			await expect(page.getByTestId('member-1')).toBeVisible();
+		});
+	});
+}
+
+test.describe('the terminal in its own column never folds itself', () => {
+	test('a document keeps the menu, because the column covers nothing', async ({
+		page,
+	}) => {
+		await page.goto(routes.de.member);
+		await settled(page);
+
+		await expect(page.getByTestId('member-1')).toBeVisible();
+		expect((await dockBox(page)).height).toBeGreaterThan(80);
 	});
 });
 

@@ -1,15 +1,20 @@
 ---
 name: Andrej Ilnizkij
-role: Entwickler & Mitgründer
+role: Frontend Developer & UX Designer
 order: 3
 translationKey: andrej-ilnizkij
-description: Andrej Ilnizkij — Softwareentwickler bei kheder.codes und Mitgründer von DonnaDesk.
+description: Andrej Ilnizkij — Frontend-Entwickler und UX-Designer bei kheder.codes, zu Hause in React, SvelteKit und Astro.
 ---
 
-Andrej ist Softwareentwickler und einer der drei hinter KHEDER.codes. Zusammen
-mit Kheder und Alan hat er DonnaDesk gegründet.
+Andrej entwirft die Oberflächen und baut sie auch. Das erspart den Umweg über ein
+Layout, das sich später als nicht umsetzbar herausstellt.
 
 ## Woran er arbeitet
 
-An der Voice-AI-Plattform von DonnaDesk — von der Oberfläche bis zu den Diensten
-dahinter — und an den Kundenprojekten, die wir gemeinsam übernehmen.
+An der Oberfläche von DonnaDesk und an mawid, unserem zweiten Produkt — und an den
+Kundenprojekten, die wir gemeinsam übernehmen.
+
+## Womit er arbeitet
+
+React, SvelteKit und Astro, gestaltet mit Tailwind. Wo eine Seite nur gelesen
+wird, schickt er auch kein JavaScript hinterher.

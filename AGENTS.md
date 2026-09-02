@@ -75,16 +75,21 @@ flow as the last block of the document. Lying at the bottom it measures itself i
 `--dock-h` and `[data-shell]` keeps that much room free; in its own column the shell
 keeps `--dock-w` free on the left instead. Nothing needs its own spacing to clear it.
 
-The column is wide enough (`--dock-w`) that every main-menu row — label plus
-description — fits on a single line; keep new menu copy short enough to hold that.
+The column is wide enough (`--dock-w`) that every row — main menu and submenus, label
+plus caption — fits on a single line; keep new menu copy and new captions short enough
+to hold that. `tests/terminal-nav.spec.ts` measures row heights to catch a caption that
+outgrows the column.
 
 Only the bottom panel can be folded away — through the yellow traffic light, the
 chevron, or a click on the title bar — because only there does it cover anything;
-`TerminalDock` mirrors the same two media queries in `side` and `compact`. On a phone
-it folds itself, staying open only where the menu is still the point — the home screen
-and the submenu indexes, listed in `menuIsThePoint` — and leaving anything meant to be
-read, a content page or one of the `.md` documents, against the title bar alone;
-a manual toggle holds until the route changes. Because the dock never scrolls away,
+`TerminalDock` mirrors that one media query in `side`. Wherever it lies at the bottom,
+phone and half-width window alike, it also folds itself: it stays open only where the
+menu is still the point — the home screen and the submenu indexes, listed in
+`menuIsThePoint` — and leaves anything meant to be read, a content page or one of the
+`.md` documents, against the title bar alone. What decides is whether the panel covers
+the page, not how small the screen is. Folding never removes the panel: the title bar
+stays as the handle that brings the menu back. A manual toggle holds until the route
+changes. Because the dock never scrolls away,
 the arrows drive the menu from the page and are handed back to the browser as soon as
 the focus sits inside `[data-content]`.
 

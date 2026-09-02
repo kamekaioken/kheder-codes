@@ -38,7 +38,7 @@ test.describe('without JavaScript', () => {
 		await expect(page.locator('h1')).toHaveText(
 			'Servus, wir sind KHEDER.codes.',
 		);
-		await expect(page.locator('main')).toContainText('Kheder, Alan und Andrej');
+		await expect(page.locator('main')).toContainText('Marlen, Alan und Andrej');
 		await expect(page.locator('footer')).toBeVisible();
 	});
 

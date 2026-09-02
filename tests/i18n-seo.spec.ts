@@ -35,8 +35,8 @@ test.describe('internationalisation', () => {
 	test('the english terminal menu is translated', async ({ page }) => {
 		await page.goto(routes.en.refs);
 
-		await expect(page.getByTestId('menu-home')).toContainText('Who we are');
-		await expect(page.getByTestId('menu-team')).toContainText('team/');
+		await expect(page.getByTestId('menu-home')).toContainText('Home');
+		await expect(page.getByTestId('menu-team')).toContainText('Who we are');
 		await expect(page.getByTestId('menu-refs')).toContainText('references');
 		await expect(page.getByTestId('menu-contact')).toContainText('contact');
 		await expect(page.getByTestId('menu-settings')).toContainText('settings/');
@@ -80,7 +80,7 @@ test.describe('internationalisation', () => {
 
 		await expect(page.locator('h1')).toHaveText('Marlen Kheder');
 		await expect(page.getByTestId('member-role')).toHaveText(
-			'Full-stack & voice AI',
+			'Senior Developer & Software Architect',
 		);
 		await expect(page.locator('main h2').first()).toHaveText('What I work on');
 		await expect(page.getByTestId('doc-next')).toHaveAttribute(

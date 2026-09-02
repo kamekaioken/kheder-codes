@@ -38,7 +38,7 @@ onMount(() => entrance.settle());
 				selected={index === session.memberSelected}
 				onselect={() => session.openMember(index)}
 			>
-				<span class="min-w-[168px] flex-none">{member.file}</span>
+				<span class="min-w-[156px] flex-none">{member.file}</span>
 				<TerminalRowHint>{member.role}</TerminalRowHint>
 			</TerminalRow>
 		{/each}

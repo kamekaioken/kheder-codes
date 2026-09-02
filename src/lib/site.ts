@@ -59,6 +59,7 @@ export const references: readonly Reference[] = [
 			'Nx',
 			'Micro Frontends',
 			'Microservices',
+			'AG Grid',
 			'EF Core',
 			'Oracle',
 			'Azure DevOps',

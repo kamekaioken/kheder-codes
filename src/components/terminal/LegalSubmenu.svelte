@@ -5,6 +5,7 @@ import TerminalMenu from '../ui/terminal/TerminalMenu.svelte';
 import TerminalOutput from '../ui/terminal/TerminalOutput.svelte';
 import TerminalPrompt from '../ui/terminal/TerminalPrompt.svelte';
 import TerminalRow from '../ui/terminal/TerminalRow.svelte';
+import TerminalRowHint from '../ui/terminal/TerminalRowHint.svelte';
 import { getSession } from './session.svelte';
 
 const session = getSession();
@@ -35,7 +36,8 @@ onMount(() => entrance.settle());
 				selected={index === session.legalSelected}
 				onselect={() => session.openLegal(index)}
 			>
-				<span class="flex-none">{doc.file}</span>
+				<span class="min-w-[136px] flex-none">{doc.file}</span>
+				<TerminalRowHint>{doc.title}</TerminalRowHint>
 			</TerminalRow>
 		{/each}
 	</TerminalMenu>

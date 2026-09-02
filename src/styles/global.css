@@ -127,7 +127,7 @@
 /* The dock's own measurements: the width of its column on a wide screen, and the
    shadow it casts on the page from whichever edge it sits. */
 :root {
-	--dock-w: clamp(460px, 34vw, 560px);
+	--dock-w: clamp(540px, 38vw, 640px);
 	--shadow-dock:
 		0 -16px 44px light-dark(rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.55)),
 		0 -2px 8px light-dark(rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.35));

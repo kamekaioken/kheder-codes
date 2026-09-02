@@ -13,10 +13,10 @@ test.describe('content pages', () => {
 			'Servus, wir sind KHEDER.codes.',
 		);
 		await expect(page.locator('main p').first()).toContainText(
-			'Drei Softwareentwickler aus Nürnberg: Kheder, Alan und Andrej.',
+			'Das sind Marlen, Alan und Andrej — drei Softwareentwickler aus Nürnberg.',
 		);
 		await expect(page.locator('main strong')).toHaveText(
-			'Kheder, Alan und Andrej',
+			'Marlen, Alan und Andrej',
 		);
 
 		const donna = page.locator('main a', { hasText: 'DonnaDesk' });
@@ -80,7 +80,7 @@ test.describe('content pages', () => {
 		);
 		await expect(page.locator('h1')).toHaveText('Marlen Kheder');
 		await expect(page.getByTestId('member-role')).toHaveText(
-			'Full-Stack & Voice AI',
+			'Senior Developer & Software Architect',
 		);
 		await expect(page.locator('main h2').first()).toHaveText(
 			'Woran ich arbeite',
@@ -142,11 +142,27 @@ test.describe('content pages', () => {
 		await expect(entries.nth(3)).toContainText(
 			'WTS Steuerberatungsgesellschaft mbH',
 		);
+		await expect(entries.nth(3)).toContainText(
+			'Fachanwendung für die internationale Einkommensteuer entsandter Mitarbeiter.',
+		);
 		await expect(entries.nth(4)).toContainText(
 			'Deutsches Zahnärztliches Rechenzentrum GmbH',
 		);
 		await expect(entries.nth(4)).not.toHaveClass(/border-b/);
 
+		await expect(entries.nth(1).locator('ul li')).toContainText([
+			'C#',
+			'.NET',
+			'Angular',
+			'TypeScript',
+			'Nx',
+			'Micro Frontends',
+			'Microservices',
+			'AG Grid',
+			'EF Core',
+			'Oracle',
+			'Azure DevOps',
+		]);
 		await expect(entries.nth(0).locator('ul li')).toContainText([
 			'TypeScript',
 			'Bun',
